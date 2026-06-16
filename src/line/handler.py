@@ -21,10 +21,7 @@ from linebot.v3.webhooks.models import (
 )
 
 from . import client as line_client
-from ..audio.analyzer import AudioAnalyzer
 from ..audio.models import AudioFile
-from ..diagnosis.engine import DiagnosisEngine
-from ..report.generator import ReportGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +129,7 @@ async def _process_audio_and_push(user_id: str, message_id: str) -> None:
             format="m4a",
             session_id=session_id,
         )
+        from ..audio.analyzer import AudioAnalyzer
         analyzer = AudioAnalyzer()
         analysis = await asyncio.get_event_loop().run_in_executor(
             None, analyzer.analyze, audio_file
@@ -151,6 +149,7 @@ async def _process_audio_and_push(user_id: str, message_id: str) -> None:
             return
 
         # STEP 3: スピリチュアル診断
+        from ..diagnosis.engine import DiagnosisEngine
         engine = DiagnosisEngine()
         diagnosis = engine.diagnose(analysis)
         logger.info(f"診断完了: archetype={diagnosis.archetype_name}")

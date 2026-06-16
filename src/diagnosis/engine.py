@@ -256,68 +256,59 @@ class DiagnosisEngine(IDiagnosisEngine):
 
     def _select_archetype(self, big5: Big5Score) -> str:
         """
-        Big5スコアからアーキタイプコードを決定する。
+        Big5の相対的パターンからアーキタイプを決定する。
 
-        決定ロジック:
-            1. 協調性が最重要（高/低で大分類）
-            2. 外向性×神経症傾向で4パターン
-            3. 開放性×誠実性で4パターン
-            合計 = 1 + 4 + 4 = 10アーキタイプ
+        【改訂版】絶対閾値ではなく「5因子の中で最も高い上位2因子のペア」で決定。
+        これにより全10アーキタイプが自然に分散する。
+
+        マッピング（C(5,2)=10通り）:
+            E+N → STORM_SHAMAN    カリスマ的・感情豊か
+            E+O → SOLAR_HERALD    エネルギッシュ・創造的
+            E+C → EARTH_GUARDIAN  行動力・誠実
+            E+A → SKY_HARMONIST   社交的・調和
+            N+O → COMET_SEEKER    芸術的・感受性豊か
+            N+C → FOG_ORACLE      慎重・几帳面
+            N+A → WIND_PIONEER    共感力・先駆
+            O+C → STAR_ARCHITECT  創造×組織力
+            O+A → TIDE_WANDERER   開放的・協調
+            C+A → MOON_SAGE       誠実・温かさ
         """
-        E = big5.extraversion_level   # high / mid / low
-        N = big5.neuroticism_level
-        O = big5.openness_level
-        C = big5.conscientiousness_level
-        A = big5.agreeableness_level
+        scores = [
+            ("E", big5.extraversion),
+            ("N", big5.neuroticism),
+            ("O", big5.openness),
+            ("C", big5.conscientiousness),
+            ("A", big5.agreeableness),
+        ]
 
-        # 協調性が突出して高い → SKY_HARMONIST
-        if A == "high":
-            return "SKY_HARMONIST"
+        # スコアの高い順にソート（同点の場合はリスト順で安定ソート）
+        sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
 
-        # 協調性が突出して低い → WIND_PIONEER
-        if A == "low":
-            return "WIND_PIONEER"
+        # 上位2因子のペアを取得
+        top1 = sorted_scores[0][0]
+        top2 = sorted_scores[1][0]
+        top_pair = frozenset([top1, top2])
 
-        # 外向性 × 神経症傾向 のマトリクス（4パターン）
-        if E == "high" and N == "low":
-            return "SOLAR_HERALD"    # 火高・水低 = 太陽の伝道者
-
-        if E == "high" and N == "high":
-            return "STORM_SHAMAN"    # 火高・水高 = 嵐の巫師
-
-        if E == "low" and N == "low":
-            return "MOON_SAGE"       # 火低・水低 = 月の賢者
-
-        if E == "low" and N == "high":
-            return "FOG_ORACLE"      # 火低・水高 = 霧の神託者
-
-        # E==mid の場合: 開放性 × 誠実性 で判定
-        if O == "high" and C == "high":
-            return "STAR_ARCHITECT"  # 風高・地高 = 星の建築家
-
-        if O == "high" and C != "high":
-            return "COMET_SEEKER"    # 風高・地低 = 彗星の探求者
-
-        if O != "high" and C == "high":
-            return "EARTH_GUARDIAN" # 風低・地高 = 大地の守護者
-
-        # どのパターンにも当てはまらない場合（中間値が多い）
-        # 最もスコアが高い因子で判定
-        scores = {
-            "extraversion": big5.extraversion,
-            "neuroticism": big5.neuroticism,
-            "openness": big5.openness,
-            "conscientiousness": big5.conscientiousness,
+        archetype_map = {
+            frozenset(["E", "N"]): "STORM_SHAMAN",
+            frozenset(["E", "O"]): "SOLAR_HERALD",
+            frozenset(["E", "C"]): "EARTH_GUARDIAN",
+            frozenset(["E", "A"]): "SKY_HARMONIST",
+            frozenset(["N", "O"]): "COMET_SEEKER",
+            frozenset(["N", "C"]): "FOG_ORACLE",
+            frozenset(["N", "A"]): "WIND_PIONEER",
+            frozenset(["O", "C"]): "STAR_ARCHITECT",
+            frozenset(["O", "A"]): "TIDE_WANDERER",
+            frozenset(["C", "A"]): "MOON_SAGE",
         }
-        max_factor = max(scores, key=scores.get)
 
-        fallback_map = {
-            "extraversion": "SOLAR_HERALD",
-            "neuroticism": "FOG_ORACLE",
-            "openness": "COMET_SEEKER",
-            "conscientiousness": "EARTH_GUARDIAN",
-        }
-        return fallback_map.get(max_factor, "TIDE_WANDERER")
+        archetype_code = archetype_map.get(top_pair, "SOLAR_HERALD")
+
+        logger.info(
+            f"アーキタイプ選択: top1={top1}({sorted_scores[0][1]:.3f}), "
+            f"top2={top2}({sorted_scores[1][1]:.3f}) → {archetype_code}"
+        )
+        return archetype_code
 
     def _generate_voice_code_id(self, session_id: str, f0_mean: float) -> str:
         """

@@ -156,6 +156,7 @@ async def _process_audio_and_push(user_id: str, message_id: str) -> None:
 
         # STEP 4: レポート生成（PDF + HTML）—— 同期関数なのでexecutorで実行
         from ..config import OUTPUT_DIR
+        from ..report.generator import ReportGenerator
         generator = ReportGenerator(output_dir=OUTPUT_DIR)
         report = await asyncio.get_event_loop().run_in_executor(
             None,

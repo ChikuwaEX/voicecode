@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# 環境変数（機密情報）
+.env
+!.env.example
+
+# 音声データ（プライバシー保護）
+uploads/
+outputs/
+*.wav
+*.mp3
+*.m4a
+*.webm
+*.ogg
+
+# PDF出力
+*.pdf
+
+# データベース
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# テスト
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ビルド
+dist/
+build/
+*.egg-info/

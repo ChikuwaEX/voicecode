@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>声紋診断 — VOICECODE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Shippori+Mincho:wght@400;600;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07070E;
+            --bg2: #0C0C1A;
+            --text: #E8E0FF;
+            --muted: #7A7A9A;
+            --gold: #D4AF37;
+            --gold2: #F0D060;
+            --border: rgba(212,175,55,0.15);
+            --border2: rgba(255,255,255,0.06);
+            --display: 'Cinzel', serif;
+            --serif: 'Shippori Mincho', serif;
+            --sans: 'Noto Sans JP', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--serif);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 40px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(7,7,14,0.9);
+        }
+        .nav-logo {
+            font-family: var(--display);
+            font-size: 15px;
+            letter-spacing: 6px;
+            color: var(--gold);
+            text-decoration: none;
+        }
+        .nav-back {
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-back:hover { color: var(--gold); }
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            padding: 52px 48px;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+        }
+        .card-eyebrow {
+            font-family: var(--display);
+            font-size: 10px;
+            letter-spacing: 5px;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .card-sub {
+            font-family: var(--sans);
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.9;
+            margin-bottom: 36px;
+        }
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .input-group input[type=text] {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border2);
+            padding: 14px 16px;
+            font-family: var(--sans);
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .input-group input[type=text]:focus {
+            border-color: var(--gold);
+        }
+        .drop-zone {
+            border: 2px dashed var(--border);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 24px;
+            position: relative;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--gold);
+            background: rgba(212,175,55,0.04);
+        }
+        .drop-zone input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .drop-icon { font-size: 40px; margin-bottom: 12px; }
+        .drop-text {
+            font-family: var(--sans);
+            font-size: 14px;
+            color: var(--muted);
+        }
+        .drop-text strong { color: var(--gold); }
+        .drop-hint {
+            font-family: var(--sans);
+            font-size: 11px;
+            color: #3A3A5A;
+            margin-top: 8px;
+        }
+        .file-selected {
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--gold2);
+            background: rgba(212,175,55,0.08);
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-family: var(--sans);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: #000;
+            box-shadow: 0 4px 20px rgba(212,175,55,0.3);
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(212,175,55,0.5);
+        }
+        .btn-gold:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover {
+            background: rgba(212,175,55,0.06);
+        }
+        /* 解析中 */
+        #analyzeState { display: none; }
+        .progress-wrap {
+            margin: 24px 0;
+        }
+        .progress-bar {
+            height: 2px;
+            background: var(--border2);
+            overflow: hidden;
+        }
+        .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold2));
+            animation: progress 30s linear forwards;
+        }
+        @keyframes progress {
+            from { width: 0%; }
+            to { width: 90%; }
+        }
+        .progress-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+            text-align: left;
+        }
+        .progress-step {
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.3;
+            transition: opacity 0.5s;
+        }
+        .progress-step.active { opacity: 1; color: var(--text); }
+        .progress-step.done { opacity: 0.7; color: var(--gold); }
+        /* 結果 */
+        #resultState { display: none; }
+        .archetype-display {
+            margin: 24px 0;
+        }
+        .archetype-emoji-big { font-size: 72px; display: block; margin-bottom: 12px; }
+        .archetype-name-big {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gold2);
+            margin-bottom: 8px;
+        }
+        .archetype-rarity {
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        .voice-code {
+            font-family: var(--display);
+            font-size: 13px;
+            color: var(--gold);
+            letter-spacing: 3px;
+        }
+        .result-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+        .result-note {
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .result-price-note {
+            font-family: var(--sans);
+            font-size: 11px;
+            color: #3A3A5A;
+            margin-top: 8px;
+        }
+        /* エラー */
+        #errorState { display: none; }
+        .error-msg {
+            font-family: var(--sans);
+            font-size: 14px;
+            color: #ff6b6b;
+            background: rgba(255,107,107,0.08);
+            border: 1px solid rgba(255,107,107,0.2);
+            padding: 16px;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="/" class="nav-logo">VOICECODE</a>
+    <a href="/" class="nav-back">← トップに戻る</a>
+</nav>
+
+<div class="main">
+    <div class="card">
+
+        <!-- ====== アップロード状態 ====== -->
+        <div id="uploadState">
+            <div class="card-eyebrow">Soul Blueprint Analysis</div>
+            <h1 class="card-title">声紋診断を始める</h1>
+            <p class="card-sub">
+                15秒〜3分の声を送るだけ。<br>
+                AIが科学的に解析し、あなたの魂のブループリントを生成します。
+            </p>
+
+            <div class="input-group">
+                <label>YOUR NAME / お名前</label>
+                <input type="text" id="userName" placeholder="例: 山田 花子" maxlength="30">
+            </div>
+
+            <div class="drop-zone" id="dropZone">
+                <input type="file" id="audioFile" accept="audio/*" onchange="handleFileSelect(this)">
+                <div class="drop-icon">🎤</div>
+                <div class="drop-text"><strong>音声ファイルを選択</strong><br>またはここにドロップ</div>
+                <div class="drop-hint">WAV / MP3 / M4A / WebM 対応 ／ 15秒〜3分推奨</div>
+            </div>
+
+            <div class="file-selected" id="fileSelected"></div>
+
+            <button class="btn btn-gold" id="analyzeBtn" onclick="startAnalysis()" disabled>
+                🔮 声紋解析を開始する
+            </button>
+        </div>
+
+        <!-- ====== 解析中状態 ====== -->
+        <div id="analyzeState">
+            <div class="card-eyebrow">Analyzing</div>
+            <h2 class="card-title">声紋を解析中...</h2>
+            <p class="card-sub">約30秒お待ちください</p>
+            <div class="progress-wrap">
+                <div class="progress-bar"><div class="progress-bar-inner" id="progressBar"></div></div>
+            </div>
+            <div class="progress-steps">
+                <div class="progress-step" id="step1">🔊 音声ファイルを読み込み中</div>
+                <div class="progress-step" id="step2">📊 基本周波数（F0）を抽出中</div>
+                <div class="progress-step" id="step3">🧬 MFCC・声帯特性を分析中</div>
+                <div class="progress-step" id="step4">🎭 Big5パーソナリティを算出中</div>
+                <div class="progress-step" id="step5">🌌 魂のアーキタイプを判定中</div>
+                <div class="progress-step" id="step6">📜 プレミアムレポートを生成中</div>
+            </div>
+        </div>
+
+        <!-- ====== 結果状態 ====== -->
+        <div id="resultState">
+            <div class="card-eyebrow">✦ 解析完了 ✦</div>
+            <h2 class="card-title">あなたの声紋タイプが<br>判明しました</h2>
+
+            <div class="archetype-display">
+                <span class="archetype-emoji-big" id="resEmoji">🌌</span>
+                <div class="archetype-name-big" id="resArchetype">天空のモデレーター</div>
+                <div class="archetype-rarity" id="resRarity"></div>
+                <div class="voice-code" id="resVoiceCode"></div>
+            </div>
+
+            <div class="result-divider"></div>
+
+            <p class="result-note">
+                12ページのプレミアムレポートが生成されました。<br>
+                才能・使命・チャクラ診断・30日間プランなど<br>
+                あなただけの魂のブループリントが収録されています。
+            </p>
+
+            <div class="result-buttons">
+                <button class="btn btn-gold" id="payBtn" onclick="goToPayment()">
+                    ✨ レポートを受け取る（¥3,000）
+                </button>
+                <a class="btn btn-outline" id="previewBtn" href="#" target="_blank" style="display:inline-block;text-decoration:none;padding:16px;font-family:var(--sans);font-size:15px;font-weight:700;text-align:center;">
+                    👁️ 無料プレビューを見る
+                </a>
+            </div>
+            <p class="result-price-note">クレジットカード決済 ／ 購入後すぐにフルレポートを閲覧できます</p>
+        </div>
+
+        <!-- ====== エラー状態 ====== -->
+        <div id="errorState">
+            <div class="card-eyebrow">Error</div>
+            <h2 class="card-title" style="color:#ff6b6b;">解析エラー</h2>
+            <div class="error-msg" id="errorMsg"></div>
+            <button class="btn btn-outline" onclick="resetToUpload()">
+                🔄 もう一度試す
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let currentSessionId = null;
+    let currentViewUrl = null;
+
+    // URL パラメータのチェック（Stripe決済完了後のリダイレクト）
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('paid') === 'true' && params.get('session_id')) {
+        const sid = params.get('session_id');
+        window.location.href = `/api/v1/report/${sid}/view`;
+    }
+
+    function handleFileSelect(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const sel = document.getElementById('fileSelected');
+        sel.textContent = `✦ 選択済み: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+        sel.style.display = 'block';
+        document.getElementById('analyzeBtn').disabled = false;
+    }
+
+    // ドラッグ&ドロップ
+    const dz = document.getElementById('dropZone');
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => {
+        e.preventDefault();
+        dz.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            document.getElementById('audioFile').files = e.dataTransfer.files;
+            handleFileSelect(document.getElementById('audioFile'));
+        }
+    });
+
+    async function startAnalysis() {
+        const file = document.getElementById('audioFile').files[0];
+        const userName = document.getElementById('userName').value.trim() || 'ゲスト';
+        if (!file) return;
+
+        // 解析中画面に切り替え
+        document.getElementById('uploadState').style.display = 'none';
+        document.getElementById('analyzeState').style.display = 'block';
+
+        // プログレスステップアニメーション
+        const steps = ['step1','step2','step3','step4','step5','step6'];
+        const delays = [0, 4000, 8000, 13000, 18000, 22000];
+        steps.forEach((id, i) => {
+            setTimeout(() => {
+                if (i > 0) document.getElementById(steps[i-1]).className = 'progress-step done';
+                document.getElementById(id).className = 'progress-step active';
+            }, delays[i]);
+        });
+
+        // APIに送信
+        const formData = new FormData();
+        formData.append('audio_file', file);
+        formData.append('user_name', userName);
+
+        try {
+            const res = await fetch('/api/v1/audio/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.detail || '解析に失敗しました');
+
+            currentSessionId = data.session_id;
+            currentViewUrl = data.report_view_url;
+
+            // 結果表示
+            document.getElementById('resEmoji').textContent = data.archetype_emoji || '🔮';
+            document.getElementById('resArchetype').textContent = data.archetype_name || '解析完了';
+            document.getElementById('resRarity').textContent = data.rarity || '';
+            document.getElementById('resVoiceCode').textContent = data.voice_code_id ? `Voice Code: ${data.voice_code_id}` : '';
+            document.getElementById('previewBtn').href = data.report_view_url || '#';
+
+            // 全ステップを完了にする
+            steps.forEach(id => document.getElementById(id).className = 'progress-step done');
+
+            setTimeout(() => {
+                document.getElementById('analyzeState').style.display = 'none';
+                document.getElementById('resultState').style.display = 'block';
+            }, 500);
+
+        } catch (err) {
+            document.getElementById('analyzeState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMsg').textContent = err.message;
+        }
+    }
+
+    async function goToPayment() {
+        if (!currentSessionId) return;
+
+        const btn = document.getElementById('payBtn');
+        btn.disabled = true;
+        btn.textContent = '決済ページに移動中...';
+
+        try {
+            const res = await fetch('/api/v1/payment/create-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: currentSessionId })
+            });
+            const data = await res.json();
+
+            if (data.already_paid) {
+                // 支払い済みなら直接レポートへ
+                window.location.href = data.report_url;
+                return;
+            }
+
+            if (data.checkout_url) {
+                window.location.href = data.checkout_url;
+            } else {
+                // 決済システム未設定の場合は直接レポートを開く（開発用）
+                window.open(currentViewUrl, '_blank');
+                btn.disabled = false;
+                btn.textContent = '✨ レポートを受け取る（¥3,000）';
+            }
+        } catch (err) {
+            // Stripe未設定の場合はレポートを直接開く
+            window.open(currentViewUrl, '_blank');
+            btn.disabled = false;
+            btn.textContent = '✨ レポートを受け取る（¥3,000）';
+        }
+    }
+
+    function resetToUpload() {
+        currentSessionId = null;
+        currentViewUrl = null;
+        document.getElementById('errorState').style.display = 'none';
+        document.getElementById('resultState').style.display = 'none';
+        document.getElementById('analyzeState').style.display = 'none';
+        document.getElementById('uploadState').style.display = 'block';
+        document.getElementById('audioFile').value = '';
+        document.getElementById('fileSelected').style.display = 'none';
+        document.getElementById('analyzeBtn').disabled = true;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOICECODE — あなたの声に、宇宙の答えがある。声紋スピリチュアル診断</title>
+    <meta name="description" content="声を30秒送るだけ。AIが声紋を科学的に分析し、あなたの魂の使命・才能・運命パターンを12ページのプレミアムレポートで解析します。">
+    <meta property="og:title" content="VOICECODE — 声紋スピリチュアル診断">
+    <meta property="og:description" content="声を30秒送るだけ。AIが声紋を科学的に分析し、あなたの魂の使命・才能・運命パターンを12ページのプレミアムレポートで解析します。">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Shippori+Mincho:wght@400;600;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07070E;
+            --bg2: #0C0C1A;
+            --bg3: #101020;
+            --text: #E8E0FF;
+            --muted: #7A7A9A;
+            --dim: #3A3A5A;
+            --gold: #D4AF37;
+            --gold2: #F0D060;
+            --gold3: #FFF0A0;
+            --border: rgba(212,175,55,0.15);
+            --border2: rgba(255,255,255,0.06);
+            --purple: #8E44AD;
+            --display: 'Cinzel', serif;
+            --serif: 'Shippori Mincho', serif;
+            --sans: 'Noto Sans JP', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--serif);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        /* ========== NAV ========== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 48px;
+            background: rgba(7,7,14,0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: var(--display);
+            font-size: 16px;
+            letter-spacing: 6px;
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--gold); }
+
+        .nav-cta {
+            font-family: var(--sans);
+            font-size: 13px;
+            font-weight: 700;
+            color: #000;
+            background: var(--gold);
+            padding: 10px 24px;
+            text-decoration: none;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .nav-cta:hover {
+            background: var(--gold2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(212,175,55,0.4);
+        }
+
+        /* ========== HERO ========== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 40px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 背景のオーブアニメーション */
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 800px; height: 800px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(142,68,173,0.08) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%);
+            top: 30%; left: 60%;
+            animation: pulse 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        /* 星フィールド */
+        .stars {
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle 1px at 15% 20%, rgba(212,175,55,0.6) 0%, transparent 100%),
+                radial-gradient(circle 1px at 85% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+                radial-gradient(circle 1.5px at 70% 40%, rgba(212,175,55,0.5) 0%, transparent 100%),
+                radial-gradient(circle 1px at 25% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+                radial-gradient(circle 1px at 90% 70%, rgba(212,175,55,0.4) 0%, transparent 100%),
+                radial-gradient(circle 1px at 50% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
+                radial-gradient(circle 1px at 10% 50%, rgba(212,175,55,0.3) 0%, transparent 100%),
+                radial-gradient(circle 1.5px at 45% 25%, rgba(255,255,255,0.2) 0%, transparent 100%);
+        }
+
+        .hero-content { position: relative; z-index: 1; max-width: 760px; }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--sans);
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--gold);
+            border: 1px solid var(--border);
+            padding: 8px 20px;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+
+        .hero-badge span { animation: blink 2s ease-in-out infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        h1 {
+            font-family: var(--serif);
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 800;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff 0%, var(--gold2) 50%, var(--gold3) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-family: var(--sans);
+            font-size: 17px;
+            color: var(--muted);
+            line-height: 2;
+            margin-bottom: 48px;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--sans);
+            font-size: 15px;
+            font-weight: 700;
+            color: #000;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            padding: 16px 40px;
+            text-decoration: none;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 24px rgba(212,175,55,0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(212,175,55,0.5);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--sans);
+            font-size: 15px;
+            color: var(--gold);
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 16px 40px;
+            text-decoration: none;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(212,175,55,0.05);
+            border-color: var(--gold);
+        }
+
+        /* 統計バー */
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-item { text-align: center; }
+
+        .stat-num {
+            font-family: var(--display);
+            font-size: 28px;
+            color: var(--gold2);
+            display: block;
+        }
+
+        .stat-label {
+            font-family: var(--sans);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ========== SECTION COMMON ========== */
+        section {
+            padding: 100px 40px;
+        }
+
+        .section-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section-eyebrow {
+            font-family: var(--display);
+            font-size: 11px;
+            letter-spacing: 6px;
+            color: var(--gold);
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: var(--serif);
+            font-size: clamp(24px, 3.5vw, 38px);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .section-desc {
+            font-family: var(--sans);
+            font-size: 15px;
+            color: var(--muted);
+            text-align: center;
+            max-width: 580px;
+            margin: 0 auto 60px;
+            line-height: 2;
+        }
+
+        .divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 24px auto;
+        }
+
+        /* ========== HOW IT WORKS ========== */
+        #how { background: var(--bg2); }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: var(--border2);
+        }
+
+        .step {
+            background: var(--bg2);
+            padding: 48px 36px;
+            text-align: center;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .step:hover { background: var(--bg3); }
+
+        .step-num {
+            font-family: var(--display);
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .step-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+            display: block;
+            filter: drop-shadow(0 0 12px rgba(212,175,55,0.3));
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold2);
+            margin-bottom: 12px;
+        }
+
+        .step-desc {
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.9;
+        }
+
+        /* ========== REPORT PREVIEW ========== */
+        #preview { background: var(--bg); }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .report-card {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-top: 2px solid var(--gold);
+            padding: 28px;
+            transition: all 0.3s;
+        }
+
+        .report-card:hover {
+            border-top-color: var(--gold2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(212,175,55,0.08);
+        }
+
+        .report-card-num {
+            font-family: var(--display);
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .report-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .report-card-desc {
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .report-highlight {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(212,175,55,0.05), rgba(142,68,173,0.05));
+            border: 1px solid var(--border);
+            padding: 32px;
+            text-align: center;
+        }
+
+        .report-highlight-title {
+            font-family: var(--display);
+            font-size: 13px;
+            letter-spacing: 4px;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .report-highlight-text {
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* ========== SCIENCE ========== */
+        #science { background: var(--bg2); }
+
+        .science-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .science-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border2);
+            padding: 28px 24px;
+            text-align: center;
+        }
+
+        .science-icon {
+            font-size: 36px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .science-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gold2);
+            margin-bottom: 10px;
+        }
+
+        .science-body {
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .science-ref {
+            font-size: 10px;
+            color: var(--dim);
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* ========== ARCHETYPES ========== */
+        #archetypes { background: var(--bg); }
+
+        .archetype-scroll {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .archetype-chip {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            padding: 20px 12px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: default;
+        }
+
+        .archetype-chip:hover {
+            border-color: var(--gold);
+            background: var(--bg3);
+            transform: translateY(-3px);
+        }
+
+        .archetype-chip-emoji { font-size: 32px; margin-bottom: 10px; display: block; }
+        .archetype-chip-name { font-size: 12px; font-weight: 700; color: var(--gold2); }
+        .archetype-chip-element {
+            font-family: var(--sans);
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* ========== PRICING ========== */
+        #pricing { background: var(--bg2); }
+
+        .pricing-card {
+            max-width: 520px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(212,175,55,0.06), rgba(142,68,173,0.06));
+            border: 1px solid var(--border);
+            padding: 52px 48px;
+            text-align: center;
+            position: relative;
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold);
+            color: #000;
+            font-family: var(--sans);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 20px;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .pricing-price {
+            font-family: var(--display);
+            font-size: 56px;
+            color: var(--gold2);
+            margin: 20px 0 4px;
+        }
+
+        .pricing-unit {
+            font-family: var(--sans);
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 32px;
+        }
+
+        .pricing-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 40px;
+        }
+
+        .pricing-features li {
+            font-family: var(--sans);
+            font-size: 14px;
+            color: var(--text);
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pricing-features li:last-child { border-bottom: none; }
+
+        .pricing-features li::before {
+            content: '✦';
+            color: var(--gold);
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        /* ========== FAQ ========== */
+        #faq { background: var(--bg); }
+
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+        }
+
+        .faq-q {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 22px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            text-align: left;
+            color: var(--text);
+            font-family: var(--serif);
+            font-size: 15px;
+            font-weight: 600;
+            gap: 16px;
+        }
+
+        .faq-icon {
+            color: var(--gold);
+            font-size: 20px;
+            flex-shrink: 0;
+            transition: transform 0.3s;
+            font-family: var(--sans);
+            font-weight: 300;
+        }
+
+        .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s;
+            font-family: var(--sans);
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.9;
+            padding: 0 28px;
+        }
+
+        .faq-item.open .faq-a {
+            max-height: 300px;
+            padding: 0 28px 22px;
+        }
+
+        /* ========== CTA FINAL ========== */
+        .cta-section {
+            background: var(--bg2);
+            padding: 120px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 60% at 50% 100%, rgba(212,175,55,0.06), transparent);
+        }
+
+        .cta-title {
+            font-family: var(--serif);
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, var(--gold2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-sub {
+            font-family: var(--sans);
+            font-size: 15px;
+            color: var(--muted);
+            margin-bottom: 48px;
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            background: #040408;
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border2);
+        }
+
+        .footer-logo {
+            font-family: var(--display);
+            font-size: 14px;
+            letter-spacing: 6px;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover { color: var(--gold); }
+
+        .footer-copy {
+            font-family: var(--sans);
+            font-size: 11px;
+            color: var(--dim);
+        }
+
+        /* ========== SCROLL ANIMATION ========== */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            nav { padding: 16px 20px; }
+            .nav-links { display: none; }
+            .steps, .science-grid, .archetype-scroll { grid-template-columns: 1fr 1fr; }
+            .report-grid { grid-template-columns: 1fr; }
+            .hero-stats { gap: 24px; }
+            section { padding: 70px 20px; }
+            .pricing-card { padding: 40px 24px; }
+        }
+
+        @media (max-width: 480px) {
+            .steps, .archetype-scroll { grid-template-columns: 1fr; }
+            .science-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ====== NAV ====== -->
+<nav>
+    <a href="/" class="nav-logo">VOICECODE</a>
+    <ul class="nav-links">
+        <li><a href="#how">診断の仕組み</a></li>
+        <li><a href="#preview">レポート内容</a></li>
+        <li><a href="#pricing">料金</a></li>
+        <li><a href="#faq">よくある質問</a></li>
+    </ul>
+    <a href="/app" class="nav-cta" id="navCta">🎤 声紋診断を受ける</a>
+</nav>
+
+<!-- ====== HERO ====== -->
+<section class="hero" id="hero">
+    <div class="stars"></div>
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span>●</span> Soul Blueprint Analysis
+        </div>
+
+        <h1>あなたの声に、<br>宇宙の答えがある。</h1>
+
+        <p class="hero-sub">
+            声を30秒送るだけ。<br>
+            AIが声紋を科学的に分析し、<br>
+            あなたの魂の使命・才能・運命パターンを<br>
+            12ページのプレミアムレポートで解析します。
+        </p>
+
+        <div class="hero-buttons">
+            <a href="/app" class="btn-primary" id="heroMainCta">
+                🎤 今すぐ声紋診断を受ける
+            </a>
+            <a href="#how" class="btn-secondary">
+                仕組みを見る →
+            </a>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-num">10</span>
+                <span class="stat-label">Archetypes</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">12</span>
+                <span class="stat-label">Pages Report</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">6</span>
+                <span class="stat-label">Scientific Charts</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">30</span>
+                <span class="stat-label">Day Action Plan</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== HOW IT WORKS ====== -->
+<section id="how">
+    <div class="section-inner">
+        <p class="section-eyebrow fade-up">How It Works</p>
+        <h2 class="section-title fade-up">たった3ステップで<br>魂の設計図を手に入れる</h2>
+        <div class="divider fade-up"></div>
+        <p class="section-desc fade-up">
+            特別なスキルは不要。声を送るだけで、<br>
+            AIが科学的に分析し、プレミアムレポートをお届けします。
+        </p>
+
+        <div class="steps fade-up">
+            <div class="step">
+                <div class="step-num">STEP 01</div>
+                <span class="step-icon">🎤</span>
+                <div class="step-title">声を送る</div>
+                <p class="step-desc">
+                    LINEかWebから15秒〜3分の声を送信。<br>
+                    普通に話すだけでOK。<br>
+                    特別な準備は一切不要です。
+                </p>
+            </div>
+            <div class="step">
+                <div class="step-num">STEP 02</div>
+                <span class="step-icon">🔬</span>
+                <div class="step-title">AIが解析する</div>
+                <p class="step-desc">
+                    YIN算法・MFCC・Praat準拠アルゴリズムで<br>
+                    基本周波数・声帯品質・声道特性など<br>
+                    20以上の音響特徴量を瞬時に分析します。
+                </p>
+            </div>
+            <div class="step">
+                <div class="step-num">STEP 03</div>
+                <span class="step-icon">📜</span>
+                <div class="step-title">レポートを受け取る</div>
+                <p class="step-desc">
+                    約30秒で12ページのプレミアムレポートが完成。<br>
+                    Webで閲覧するか、<br>
+                    美しいPDFでダウンロードできます。
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== REPORT PREVIEW ====== -->
+<section id="preview">
+    <div class="section-inner">
+        <p class="section-eyebrow fade-up">Report Contents</p>
+        <h2 class="section-title fade-up">12ページのプレミアム<br>ソウルブループリント</h2>
+        <div class="divider fade-up"></div>
+        <p class="section-desc fade-up">
+            単なる「占い」ではありません。<br>
+            科学的音響分析とスピリチュアルな叡智を融合した、<br>
+            エグゼクティブコーチング水準のレポートです。
+        </p>
+
+        <div class="report-grid fade-up">
+            <div class="report-card">
+                <div class="report-card-num">01</div>
+                <div class="report-card-title">エグゼクティブ・サマリー</div>
+                <p class="report-card-desc">声紋プロファイルの全体像。あなたのアーキタイプ・主元素・コアストレングスを4枠のサマリーカードで一覧表示。</p>
+            </div>
+            <div class="report-card">
+                <div class="report-card-num">02</div>
+                <div class="report-card-title">声紋周波数詳細データ</div>
+                <p class="report-card-desc">6種類のChart.jsグラフ。Big5レーダー・声帯品質スコア・F0ピッチ分布・5元素ドーナツ・MFCC係数・音響特徴量比較。</p>
+            </div>
+            <div class="report-card">
+                <div class="report-card-num">03</div>
+                <div class="report-card-title">5元素エネルギーマトリクス</div>
+                <p class="report-card-desc">火・水・風・地・空の5元素への変換と、各元素の充足度・意味・補完方法の解釈。</p>
+            </div>
+            <div class="report-card">
+                <div class="report-card-num">04–05</div>
+                <div class="report-card-title">隠れた才能 + ソウルミッション</div>
+                <p class="report-card-desc">まだ気づいていない圧倒的な強み、魂が選んで生まれてきた使命、過去の出来事の霊的解釈。</p>
+            </div>
+            <div class="report-card">
+                <div class="report-card-num">06–07</div>
+                <div class="report-card-title">共鳴マップ + シャドウ統合</div>
+                <p class="report-card-desc">他のアーキタイプとの共鳴・摩擦関係の地図、ユング的シャドウとその統合実践法。</p>
+            </div>
+            <div class="report-card">
+                <div class="report-card-num">08</div>
+                <div class="report-card-title">チャクラ別エネルギー診断</div>
+                <p class="report-card-desc">7チャクラすべての活性度（HIGH/MID/LOW）を音声データから診断し、浄化プロトコルを提案。</p>
+            </div>
+            <div class="report-card">
+                <div class="report-card-num">09–10</div>
+                <div class="report-card-title">宇宙のメッセージ + 開花の鍵3つ</div>
+                <p class="report-card-desc">2026年の宇宙バイオリズムとあなたへの指針、今すぐ実践すべき具体的なアクション処方箋。</p>
+            </div>
+            <div class="report-card">
+                <div class="report-card-num">11–12</div>
+                <div class="report-card-title">30日間プラン + ヒーリング処方箋</div>
+                <p class="report-card-desc">4週間の段階的プログラム、あなたの声紋に特化した推奨クリスタル・ヒーリング音・瞑想スタイル。</p>
+            </div>
+            <div class="report-highlight">
+                <div class="report-highlight-title">✦ SCIENCE BASIS ✦</div>
+                <p class="report-highlight-text">
+                    基本周波数：YIN算法 ／ 声帯品質：Praat準拠 ／ MFCC：librosa Python ／ Big5：Mairesse et al.(2007)<br>
+                    すべてのデータはあなたの実際の音声信号から計測・算出された科学的な数値です。
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== SCIENCE ====== -->
+<section id="science">
+    <div class="section-inner">
+        <p class="section-eyebrow fade-up">Scientific Foundation</p>
+        <h2 class="section-title fade-up">声は嘘をつかない。<br>音響科学が証明する「魂の指紋」</h2>
+        <div class="divider fade-up"></div>
+        <div class="science-grid fade-up">
+            <div class="science-card">
+                <span class="science-icon">📊</span>
+                <div class="science-title">基本周波数（F0）</div>
+                <p class="science-body">声帯の振動数（Hz）は、感情状態・エネルギーレベル・外向性と高い相関を持つことが複数の研究で示されています。</p>
+                <p class="science-ref">ref: Scherer(2003), Murray & Arnott(1993)</p>
+            </div>
+            <div class="science-card">
+                <span class="science-icon">🧬</span>
+                <div class="science-title">MFCC（声道指紋）</div>
+                <p class="science-body">メル周波数ケプストラム係数は、声道の形状と共鳴特性を13次元で表す「音声の指紋」です。個人識別・感情認識に広く使用されます。</p>
+                <p class="science-ref">ref: Schuller et al.(2012)</p>
+            </div>
+            <div class="science-card">
+                <span class="science-icon">🎭</span>
+                <div class="science-title">Big5パーソナリティ</div>
+                <p class="science-body">外向性・神経症傾向・開放性・誠実性・協調性の5因子は、音声特徴量から有意な精度で予測可能なことが実証されています。</p>
+                <p class="science-ref">ref: Mairesse et al.(2007)</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== ARCHETYPES ====== -->
+<section id="archetypes" style="background: var(--bg2);">
+    <div class="section-inner">
+        <p class="section-eyebrow fade-up">Soul Archetypes</p>
+        <h2 class="section-title fade-up">10種類の魂のアーキタイプ<br>あなたはどのタイプ？</h2>
+        <div class="divider fade-up"></div>
+        <p class="section-desc fade-up">声紋解析によって判定される10種の魂のアーキタイプ。あなたの声が、どの宇宙的な役割を担っているかを明らかにします。</p>
+
+        <div class="archetype-scroll fade-up">
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">🔥</span>
+                <div class="archetype-chip-name">太陽のイニシエーター</div>
+                <div class="archetype-chip-element">主元素：火</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">⛈️</span>
+                <div class="archetype-chip-name">嵐のエンパス</div>
+                <div class="archetype-chip-element">主元素：火+水</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">🌙</span>
+                <div class="archetype-chip-name">静寂の賢者</div>
+                <div class="archetype-chip-element">主元素：水</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">🌫️</span>
+                <div class="archetype-chip-name">霧のオラクル</div>
+                <div class="archetype-chip-element">主元素：水</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">⭐</span>
+                <div class="archetype-chip-name">星のアーキテクト</div>
+                <div class="archetype-chip-element">主元素：空</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">☄️</span>
+                <div class="archetype-chip-name">彗星のパイオニア</div>
+                <div class="archetype-chip-element">主元素：風</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">🌿</span>
+                <div class="archetype-chip-name">大地のアンカー</div>
+                <div class="archetype-chip-element">主元素：地</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">🌊</span>
+                <div class="archetype-chip-name">潮流のナビゲーター</div>
+                <div class="archetype-chip-element">主元素：水+地</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">🌌</span>
+                <div class="archetype-chip-name">天空のモデレーター</div>
+                <div class="archetype-chip-element">主元素：空+地</div>
+            </div>
+            <div class="archetype-chip">
+                <span class="archetype-chip-emoji">🌬️</span>
+                <div class="archetype-chip-name">風のパラダイム・シフター</div>
+                <div class="archetype-chip-element">主元素：風</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== PRICING ====== -->
+<section id="pricing">
+    <div class="section-inner">
+        <p class="section-eyebrow fade-up">Pricing</p>
+        <h2 class="section-title fade-up">シンプルな料金体系</h2>
+        <div class="divider fade-up"></div>
+
+        <div class="pricing-card fade-up">
+            <div class="pricing-badge">PREMIUM SOUL BLUEPRINT</div>
+            <div class="pricing-price">¥3,000</div>
+            <div class="pricing-unit">1回の声紋診断（税込）</div>
+
+            <ul class="pricing-features">
+                <li>12ページ プレミアムレポート（Web + PDF）</li>
+                <li>6種類の科学的音響グラフ（レーダー・バー・ドーナツ等）</li>
+                <li>Big5パーソナリティ詳細分析</li>
+                <li>5元素エネルギーマトリクス診断</li>
+                <li>7チャクラ別エネルギー診断</li>
+                <li>30日間魂のアクティベーションプラン</li>
+                <li>ヒーリングリソース処方箋（クリスタル・音・瞑想）</li>
+                <li>PDFダウンロード永続保存</li>
+            </ul>
+
+            <a href="/app" class="btn-primary" style="width:100%; justify-content:center; font-size:16px;" id="pricingCta">
+                🎤 声紋診断を今すぐ受ける
+            </a>
+
+            <p style="font-family:var(--sans);font-size:11px;color:var(--dim);margin-top:16px;">
+                クレジットカード・各種決済に対応 ／ 購入後すぐにレポートをお届け
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ====== FAQ ====== -->
+<section id="faq" style="background: var(--bg2);">
+    <div class="section-inner">
+        <p class="section-eyebrow fade-up">FAQ</p>
+        <h2 class="section-title fade-up">よくある質問</h2>
+        <div class="divider fade-up"></div>
+
+        <div class="faq-list fade-up">
+            <div class="faq-item">
+                <button class="faq-q" onclick="toggleFaq(this)">
+                    普通の占いとどう違うのですか？
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-a">
+                    VOICECODEは、あなたの実際の声から計測した科学的数値（基本周波数・MFCC・Jitter/Shimmer等）を基に診断を行います。勘や霊感ではなく、音響科学の手法（Praat準拠アルゴリズム、YIN算法等）で算出したデータを使用しています。スピリチュアルな解釈はそのデータに基づいた解釈です。
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q" onclick="toggleFaq(this)">
+                    どんな声を送ればよいですか？
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-a">
+                    15秒〜3分の音声であれば何でもOKです。普通に話す、今日あったことを話す、好きな言葉を読み上げるなど、自然な声がベストです。静かな環境で録音することをお勧めします。
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q" onclick="toggleFaq(this)">
+                    音声データはどうなりますか？
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-a">
+                    送信された音声ファイルは解析完了後に自動削除されます。解析結果の数値データのみがレポート生成のために使用されます。第三者への提供は一切行いません。詳細はプライバシーポリシーをご参照ください。
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q" onclick="toggleFaq(this)">
+                    レポートはいつ届きますか？
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-a">
+                    音声を送信してから約30秒〜1分でレポートが生成されます。WebレポートはURLで即座に閲覧でき、PDFもそのままダウンロード可能です。
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q" onclick="toggleFaq(this)">
+                    スマートフォンからでも利用できますか？
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-a">
+                    はい。LINEからは音声メッセージを送るだけで診断できます。Webからも스マートフォンブラウザに対応しています。特別なアプリのインストールは不要です。
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-q" onclick="toggleFaq(this)">
+                    返金はできますか？
+                    <span class="faq-icon">+</span>
+                </button>
+                <div class="faq-a">
+                    デジタルコンテンツの性質上、レポート生成後の返金はお受けできません。ご購入前に「仕組み」「レポート内容」をよくご確認の上、ご購入ください。
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== CTA FINAL ====== -->
+<div class="cta-section">
+    <p class="section-eyebrow" style="position:relative;z-index:1;">Are You Ready?</p>
+    <h2 class="cta-title" style="position:relative;z-index:1;">
+        あなたの声が、<br>あなたの真実を語り始める。
+    </h2>
+    <p class="cta-sub" style="position:relative;z-index:1;">
+        声を送るだけ。今すぐ魂のブループリントを手に入れましょう。
+    </p>
+    <a href="/app" class="btn-primary" style="font-size:16px;padding:20px 52px;position:relative;z-index:1;" id="finalCta">
+        🎤 声紋診断を受ける（¥3,000）
+    </a>
+</div>
+
+<!-- ====== FOOTER ====== -->
+<footer>
+    <div class="footer-logo">VOICECODE</div>
+    <div class="footer-links">
+        <a href="/law">特定商取引法に基づく表記</a>
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="#faq">よくある質問</a>
+        <a href="#how">仕組み</a>
+    </div>
+    <p class="footer-copy">© 2026 VOICECODE — Soul Blueprint Analysis System. All rights reserved.</p>
+</footer>
+
+<script>
+    // FAQ アコーディオン
+    function toggleFaq(btn) {
+        const item = btn.closest('.faq-item');
+        item.classList.toggle('open');
+    }
+
+    // スクロールアニメーション
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                // 子要素を順番にアニメーション
+                const children = e.target.querySelectorAll('.step, .report-card, .science-card, .archetype-chip, .faq-item');
+                children.forEach((child, i) => {
+                    setTimeout(() => {
+                        child.style.opacity = '1';
+                        child.style.transform = 'translateY(0)';
+                    }, i * 80);
+                });
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => {
+        observer.observe(el);
+        // 子要素の初期スタイル
+        el.querySelectorAll('.step, .report-card, .science-card, .archetype-chip').forEach(child => {
+            child.style.opacity = '0';
+            child.style.transform = 'translateY(20px)';
+            child.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        });
+    });
+
+    // ナビゲーション スクロール時の背景強化
+    window.addEventListener('scroll', () => {
+        const nav = document.querySelector('nav');
+        if (window.scrollY > 50) {
+            nav.style.background = 'rgba(7,7,14,0.97)';
+        } else {
+            nav.style.background = 'rgba(7,7,14,0.85)';
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>VOICECODE 声紋診断レポート</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm 10mm; }
+
+  body {
+    background: #0D0D1A;
+    color: #E8E0FF;
+    font-family: 'HeiseiKakuGo-W5', sans-serif;
+    font-size: 10pt;
+    line-height: 1.7;
+    margin: 0;
+    padding: 0;
+  }
+
+  .page {
+    padding: 8mm 6mm;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  .divider {
+    height: 1px;
+    background: #D4AF37;
+    margin: 8px 0;
+    opacity: 0.4;
+  }
+
+  /* ===== カバー ===== */
+  .cover-header { text-align: center; padding: 6mm 0 4mm; }
+  .brand-name { font-size: 9pt; letter-spacing: 6px; color: #D4AF37; font-weight: normal; margin-bottom: 3px; }
+  .brand-tagline { font-size: 7pt; color: #9890C4; letter-spacing: 2px; }
+  .cover-code { font-size: 9pt; color: #9890C4; margin-top: 8px; letter-spacing: 2px; }
+  .cover-emoji { font-size: 52pt; text-align: center; margin: 6mm 0 3mm; line-height: 1; }
+  .cover-type-name { font-size: 20pt; text-align: center; color: #F0D060; font-weight: bold; letter-spacing: 2px; margin-bottom: 6px; }
+  .cover-tagline { font-size: 10pt; text-align: center; color: #9890C4; font-style: italic; line-height: 1.8; padding: 0 10mm; }
+  .cover-rarity { text-align: center; margin: 8px 0; font-size: 8pt; color: #D4AF37; letter-spacing: 1px; }
+  .cover-user { text-align: center; margin-top: 6mm; padding: 8px 16px; border-top: 1px solid #3a2e0a; border-bottom: 1px solid #3a2e0a; }
+  .cover-user-label { font-size: 7pt; color: #9890C4; letter-spacing: 3px; }
+  .cover-user-name { font-size: 14pt; color: #E8E0FF; margin-top: 4px; }
+  .cover-date { font-size: 8pt; color: #9890C4; margin-top: 4px; }
+  .cover-footer { text-align: center; margin-top: 10mm; font-size: 7pt; color: #9890C4; letter-spacing: 2px; }
+
+  /* ===== カード ===== */
+  .card {
+    background: #141428;
+    border: 1px solid #3a2e0a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .card-gold {
+    background: #141428;
+    border: 1px solid #D4AF37;
+  }
+
+  /* ===== ラベル・タイトル ===== */
+  .section-label {
+    font-size: 7pt;
+    letter-spacing: 3px;
+    color: #D4AF37;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .section-title {
+    font-size: 13pt;
+    color: #F0D060;
+    font-weight: bold;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .section-body {
+    font-size: 9pt;
+    color: #E8E0FF;
+    line-height: 1.8;
+  }
+
+  /* ===== P2: 声紋コード・Big5 ===== */
+  .voice-code-box {
+    text-align: center;
+    padding: 12px;
+    background: #141428;
+    border: 1px solid #D4AF37;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  .voice-code-label { font-size: 7pt; color: #D4AF37; letter-spacing: 3px; margin-bottom: 4px; }
+  .voice-code-value { font-size: 18pt; color: #F0D060; letter-spacing: 4px; font-weight: bold; }
+  .voice-code-sub { font-size: 7pt; color: #9890C4; margin-top: 4px; }
+
+  /* Big5バーチャート */
+  .big5-row { margin-bottom: 7px; }
+  .big5-label { font-size: 8pt; color: #9890C4; margin-bottom: 2px; }
+  .big5-track {
+    background: #1a1a35;
+    border-radius: 3px;
+    height: 7px;
+    width: 100%;
+    display: block;
+  }
+  .big5-fill {
+    height: 7px;
+    border-radius: 3px;
+    background: #D4AF37;
+    display: block;
+  }
+  .big5-val { font-size: 8pt; color: #D4AF37; text-align: right; }
+
+  /* ===== 才能リスト ===== */
+  .talent-example {
+    padding: 4px 8px;
+    margin: 4px 0;
+    background: #1a1a10;
+    border-left: 2px solid #D4AF37;
+    font-size: 8pt;
+    color: #E8E0FF;
+  }
+
+  /* ===== シャドウ ===== */
+  .shadow-box {
+    background: #141428;
+    border: 1px solid #5050a0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .shadow-title { font-size: 11pt; color: #A0A0FF; font-weight: bold; margin-bottom: 6px; }
+
+  /* ===== 宇宙メッセージ ===== */
+  .universe-box {
+    background: #141428;
+    border: 1px solid #D4AF37;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .universe-body { font-size: 9pt; color: #F0D060; font-style: italic; line-height: 1.8; }
+
+  /* ===== 開花の鍵 ===== */
+  .key-item {
+    background: #1a1a35;
+    border: 1px solid #3a3a5a;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+  .key-number { font-size: 18pt; color: #D4AF37; font-weight: bold; line-height: 1; margin-bottom: 2px; }
+  .key-title { font-size: 9pt; font-weight: bold; color: #F0D060; margin-bottom: 3px; }
+  .key-desc { font-size: 8pt; color: #9890C4; line-height: 1.6; }
+
+  /* ===== 裏表紙 ===== */
+  .back-cover { text-align: center; padding-top: 15mm; }
+  .back-brand { font-size: 11pt; letter-spacing: 8px; color: #D4AF37; margin-bottom: 6px; }
+  .back-message { font-size: 9pt; color: #9890C4; line-height: 1.8; margin: 6mm 0; }
+  .back-share { font-size: 8pt; color: #9890C4; letter-spacing: 2px; margin-top: 10mm; padding-top: 6px; border-top: 1px solid #3a2e0a; }
+
+  /* ===== 元素バッジ ===== */
+  .elem-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 8pt;
+    border: 1px solid #3a3a5a;
+    margin: 2px;
+    color: #E8E0FF;
+    background: #1a1a35;
+  }
+
+  .italic { font-style: italic; }
+  .muted { color: #9890C4; }
+</style>
+</head>
+<body>
+
+<!-- ===== P1: 表紙 ===== -->
+<div class="page">
+  <div class="cover-header">
+    <div class="brand-name">VOICECODE</div>
+    <div class="brand-tagline">声紋分析システム 精密診断レポート</div>
+    <div class="cover-code">声紋コード: {{ voice_code_id }}</div>
+  </div>
+
+  <div class="cover-emoji">{{ archetype_emoji }}</div>
+
+  <div class="cover-type-name">{{ archetype_name }}</div>
+  <div class="cover-tagline">{{ archetype_tagline }}</div>
+  <div class="cover-rarity">★ {{ archetype_rarity }} ★</div>
+
+  <div class="divider" style="margin: 8mm 0;"></div>
+
+  <div class="cover-user">
+    <div class="cover-user-label">PERSONAL REPORT FOR</div>
+    <div class="cover-user-name">{{ user_name }} 様</div>
+    <div class="cover-date">{{ diagnosed_at }}</div>
+  </div>
+
+  <div class="cover-footer">CONFIDENTIAL &nbsp;|&nbsp; VOICECODE {{ worldview_theme }}</div>
+</div>
+
+<!-- ===== P2: 声紋コード & Big5 ===== -->
+<div class="page">
+  <span class="section-label">VOICE CODE ANALYSIS</span>
+  <div class="section-title">あなたの声紋コード</div>
+
+  <div class="voice-code-box">
+    <div class="voice-code-label">YOUR UNIQUE VOICE CODE</div>
+    <div class="voice-code-value">{{ voice_code_id }}</div>
+    <div class="voice-code-sub">この宇宙でたった一つの、あなたの声の設計図</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <span class="section-label" style="margin-top: 8px; display:block;">5 ELEMENTS BALANCE</span>
+  <div class="section-title">あなたの5元素バランス</div>
+
+  {% for key, label in big5_labels.items() %}
+  <div class="big5-row">
+    <div class="big5-label">{{ label }}</div>
+    <div class="big5-track">
+      <div class="big5-fill" style="width: {{ big5_percent[key] }}%;"></div>
+    </div>
+    <div class="big5-val">{{ big5_percent[key] }}%</div>
+  </div>
+  {% endfor %}
+
+  {% if dominant_elements %}
+  <div style="margin-top: 8px;">
+    <span class="section-label">支配元素</span>
+    {% for elem in dominant_elements %}
+    <span class="elem-badge">{{ elem.emoji }} {{ elem.name }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="divider" style="margin-top: 10px;"></div>
+
+  <div class="card" style="margin-top: 8px;">
+    <span class="section-label">診断の科学的根拠について</span>
+    <div class="section-body muted">
+      この声紋コードは、音声周波数・ピッチ・リズムの科学的解析と
+      Big Five パーソナリティ理論（科学的根拠あり）を組み合わせて生成されました。
+      診断結果は「傾向」としてお読みください。
+    </div>
+  </div>
+</div>
+
+<!-- ===== P3: まだ気づいていない才能 & 使命 ===== -->
+<div class="page">
+  <span class="section-label">★ MOST IMPORTANT ★</span>
+  <div class="section-title">まだ気づいていない才能</div>
+
+  <div class="card card-gold">
+    <div style="font-size: 12pt; color: #F0D060; margin-bottom: 8px; font-weight: bold;">{{ hidden_talent_title }}</div>
+    <div class="section-body">{{ hidden_talent_description }}</div>
+  </div>
+
+  {% if hidden_talent_examples %}
+  <div style="margin-top: 8px;">
+    <span class="section-label">EXAMPLES — こんな経験はありませんか？</span>
+    {% for example in hidden_talent_examples %}
+    <div class="talent-example">✓ {{ example }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="divider" style="margin: 10px 0;"></div>
+
+  <span class="section-label">SOUL MISSION</span>
+  <div class="section-title">あなたの使命のパターン</div>
+
+  <div class="card">
+    <div style="font-size: 11pt; color: #F0D060; margin-bottom: 6px; font-weight: bold;">{{ mission_title }}</div>
+    <div class="section-body">{{ mission_description }}</div>
+  </div>
+
+  {% if mission_past_interpretation %}
+  <div class="card" style="border-style: dashed; margin-top: 6px;">
+    <span class="section-label">過去の出来事の「意味」</span>
+    <div class="section-body italic">{{ mission_past_interpretation }}</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ===== P4: シャドウ + 共鳴 + 宇宙メッセージ ===== -->
+<div class="page">
+  <span class="section-label">SHADOW SIDE</span>
+  <div class="section-title">あなたの魂が辛いこと</div>
+
+  <div class="shadow-box">
+    <div class="shadow-title">{{ shadow_title }}</div>
+    <div class="section-body">{{ shadow_description }}</div>
+  </div>
+
+  <div class="divider" style="margin: 8px 0;"></div>
+
+  <span class="section-label">RESONANCE</span>
+  <div class="section-title">共鳴する元素・チャクラ</div>
+
+  <div class="card">
+    <div class="section-body" style="margin-bottom: 4px;">{{ resonance_compatible_description }}</div>
+    <div class="divider" style="margin: 6px 0;"></div>
+    <span class="section-label">チャクラアクティベーション</span>
+    <div style="font-size: 8pt; color: #D4AF37; font-style: italic;">{{ resonance_chakra_activation }}</div>
+  </div>
+
+  <div class="divider" style="margin: 8px 0;"></div>
+
+  <span class="section-label">UNIVERSE MESSAGE</span>
+  <div class="section-title">{{ universe_message_title }}</div>
+
+  <div class="universe-box">
+    <div class="universe-body">{{ universe_message_description }}</div>
+  </div>
+</div>
+
+<!-- ===== P5: 才能を開く3つのカギ + 裏表紙 ===== -->
+<div class="page">
+  <span class="section-label">KEYS TO BLOOM</span>
+  <div class="section-title">あなたの才能を開く3つのカギ</div>
+
+  {% for key in keys_to_bloom[:3] %}
+  <div class="key-item">
+    <div class="key-number">{{ loop.index }}</div>
+    <div class="key-title">{{ key.title }}</div>
+    <div class="key-desc">{{ key.description }}</div>
+  </div>
+  {% endfor %}
+
+  <div class="divider" style="margin: 12px 0;"></div>
+
+  <div class="back-cover">
+    <div class="back-brand">VOICECODE</div>
+    <div class="muted" style="font-size: 8pt; letter-spacing: 2px; margin-bottom: 6mm;">声紋分析システム</div>
+
+    <div class="divider" style="margin: 6px auto;"></div>
+
+    <div class="back-message">
+      あなたの声には、まだ見ぬ可能性が宿っています。<br>
+      このレポートが、あなたの新たな一歩の鍵になりますように。
+    </div>
+
+    <div class="divider" style="margin: 6px auto;"></div>
+
+    <div class="back-share">
+      📱 シェアして診断結果を広めよう！ #VOICECODE #声紋診断
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

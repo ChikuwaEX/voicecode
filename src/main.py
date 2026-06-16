@@ -77,12 +77,19 @@ class NgrokSkipMiddleware(BaseHTTPMiddleware):
 app.add_middleware(NgrokSkipMiddleware)
 
 
-# APIルートを登録
-app.include_router(audio_router.router, prefix="/api/v1", tags=["audio"])
-app.include_router(diagnosis_router.router, prefix="/api/v1", tags=["diagnosis"])
-app.include_router(report_router.router, prefix="/api/v1", tags=["report"])
-app.include_router(line_router.router, prefix="/api/v1", tags=["line"])
-app.include_router(payment_router.router, prefix="/api/v1", tags=["payment"])
+# APIルートを安全に登録（エラーが出ても他のルートは動く）
+def _safe_include_router(router_module, name: str):
+    try:
+        app.include_router(router_module.router, prefix="/api/v1", tags=[name])
+        logger.info(f"✅ ルーター登録成功: {name}")
+    except Exception as e:
+        logger.error(f"❌ ルーター登録失敗: {name} — {e}")
+
+_safe_include_router(audio_router, "audio")
+_safe_include_router(diagnosis_router, "diagnosis")
+_safe_include_router(report_router, "report")
+_safe_include_router(line_router, "line")
+_safe_include_router(payment_router, "payment")
 
 
 @app.get("/")

@@ -13,21 +13,77 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
 
-from .api import audio as audio_router
-from .api import diagnosis as diagnosis_router
-from .api import report as report_router
-from .api import line_webhook as line_router
-from .api import payment as payment_router
-from . import config
-
-# ログ設定
+# ログ設定（最初に行う）
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+# ============================================================
+# configを安全にimport
+# ============================================================
+try:
+    from . import config
+    logger.info("✅ config import OK")
+except Exception as e:
+    logger.error(f"❌ config import FAILED: {e}")
+    import types
+    config = types.SimpleNamespace(
+        APP_ENV="production",
+        APP_HOST="0.0.0.0",
+        APP_PORT=8000,
+        BASE_URL="http://localhost:8000",
+        UPLOAD_DIR=Path("./uploads"),
+        OUTPUT_DIR=Path("./outputs"),
+        WORLDVIEW_THEME="elements_v1",
+        LINE_CHANNEL_ACCESS_TOKEN="",
+        LINE_CHANNEL_SECRET="",
+    )
+
+# ============================================================
+# 各ルーターを安全にimport（失敗しても起動を続ける）
+# ============================================================
+audio_router = None
+diagnosis_router = None
+report_router = None
+line_router = None
+payment_router = None
+
+try:
+    from .api import audio as audio_router
+    logger.info("✅ audio router import OK")
+except Exception as e:
+    logger.error(f"❌ audio router import FAILED: {e}", exc_info=True)
+
+try:
+    from .api import diagnosis as diagnosis_router
+    logger.info("✅ diagnosis router import OK")
+except Exception as e:
+    logger.error(f"❌ diagnosis router import FAILED: {e}", exc_info=True)
+
+try:
+    from .api import report as report_router
+    logger.info("✅ report router import OK")
+except Exception as e:
+    logger.error(f"❌ report router import FAILED: {e}", exc_info=True)
+
+try:
+    from .api import line_webhook as line_router
+    logger.info("✅ line router import OK")
+except Exception as e:
+    logger.error(f"❌ line router import FAILED: {e}", exc_info=True)
+
+try:
+    from .api import payment as payment_router
+    logger.info("✅ payment router import OK")
+except Exception as e:
+    logger.error(f"❌ payment router import FAILED: {e}", exc_info=True)
+
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -40,10 +96,8 @@ async def lifespan(app: FastAPI):
     logger.info(f"アップロードディレクトリ: {config.UPLOAD_DIR}")
     logger.info(f"出力ディレクトリ: {config.OUTPUT_DIR}")
     logger.info(f"世界観テーマ: {config.WORLDVIEW_THEME}")
-    logger.info(f"GUI: http://localhost:{config.APP_PORT}")
-    logger.info(f"LINE Webhook: {config.BASE_URL}/api/v1/line/webhook")
     line_ok = bool(config.LINE_CHANNEL_ACCESS_TOKEN and config.LINE_CHANNEL_SECRET)
-    logger.info(f"LINE Bot: {'✅ 設定済み' if line_ok else '⚠️  未設定（.envを確認）'}")
+    logger.info(f"LINE Bot: {'✅ 設定済み' if line_ok else '⚠️  未設定'}")
     logger.info("=" * 50)
     yield
     logger.info("VOICECODE シャットダウン完了")
@@ -64,9 +118,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ngrok ブラウザ警告ページをスキップするミドルウェア
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request as StarletteRequest
 
 class NgrokSkipMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: StarletteRequest, call_next):
@@ -77,19 +128,22 @@ class NgrokSkipMiddleware(BaseHTTPMiddleware):
 app.add_middleware(NgrokSkipMiddleware)
 
 
-# APIルートを安全に登録（エラーが出ても他のルートは動く）
-def _safe_include_router(router_module, name: str):
+# APIルートを安全に登録
+def _safe_include(router_module, tag: str):
+    if router_module is None:
+        logger.warning(f"⚠️  {tag} router skipped (import failed)")
+        return
     try:
-        app.include_router(router_module.router, prefix="/api/v1", tags=[name])
-        logger.info(f"✅ ルーター登録成功: {name}")
+        app.include_router(router_module.router, prefix="/api/v1", tags=[tag])
+        logger.info(f"✅ {tag} router registered")
     except Exception as e:
-        logger.error(f"❌ ルーター登録失敗: {name} — {e}")
+        logger.error(f"❌ {tag} router registration failed: {e}", exc_info=True)
 
-_safe_include_router(audio_router, "audio")
-_safe_include_router(diagnosis_router, "diagnosis")
-_safe_include_router(report_router, "report")
-_safe_include_router(line_router, "line")
-_safe_include_router(payment_router, "payment")
+_safe_include(audio_router, "audio")
+_safe_include(diagnosis_router, "diagnosis")
+_safe_include(report_router, "report")
+_safe_include(line_router, "line")
+_safe_include(payment_router, "payment")
 
 
 @app.get("/")
@@ -107,7 +161,6 @@ async def serve_app():
     app_path = FRONTEND_DIR / "app.html"
     if app_path.exists():
         return FileResponse(str(app_path))
-    # app.htmlがなければLPにフォールバック
     return FileResponse(str(FRONTEND_DIR / "index.html"))
 
 
@@ -135,10 +188,12 @@ async def health_check():
 
 
 if __name__ == "__main__":
+    import os
+    port = int(os.getenv("PORT", str(getattr(config, "APP_PORT", 8000))))
     uvicorn.run(
         "src.main:app",
-        host=config.APP_HOST,
-        port=config.APP_PORT,
-        reload=config.APP_ENV == "development",
+        host="0.0.0.0",
+        port=port,
+        reload=False,
         log_level="info",
     )

@@ -101,6 +101,34 @@ class WorldviewLoader:
         elements = self._data.get("elements", {})
         return elements.get(element_code, {})
 
+    def get_element_color(self, element_code: str, polarity: str) -> dict:
+        """
+        元素コード＋陰陽から対応する色情報を返す。
+
+        Args:
+            element_code: 元素コード（例: "FIRE"）
+            polarity: "陽" or "陰"
+
+        Returns:
+            dict: {"name": "紅蓮", "reading": "ぐれん", "hex": "#C0392B"}
+        """
+        element = self.get_element(element_code)
+        if not element:
+            return {"name": "", "reading": "", "hex": "#FFFFFF"}
+
+        color_key = "yang_color" if polarity == "陽" else "yin_color"
+        color_data = element.get(color_key)
+
+        # 新形式（yang_color/yin_color）が存在しない場合は旧形式フォールバック
+        if not color_data:
+            return {
+                "name": element.get("name", ""),
+                "reading": "",
+                "hex": element.get("color", "#FFFFFF"),
+            }
+
+        return color_data
+
     def get_meta(self) -> dict:
         """テーマのメタ情報を返す"""
         return self._data.get("meta", {})

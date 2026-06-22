@@ -1,7 +1,8 @@
 """
-診断 データモデル定義
+声紋言霊リーディング データモデル定義
 
-Big5パーソナリティ理論に基づいた診断結果を格納します。
+Big5パーソナリティ理論に基づいたリーディング結果を格納します。
+声→周波数→色→命名のフローを反映した構造。
 """
 
 from dataclasses import dataclass, field
@@ -85,41 +86,45 @@ class Big5Score:
 @dataclass
 class DiagnosisResult:
     """
-    診断結果データクラス。
+    声紋言霊リーディング結果データクラス。
 
-    音声解析結果 → Big5スコア → スピリチュアル表現
+    音声解析結果 → Big5スコア → 言霊テック世界観
     の変換結果をすべて格納します。
+
+    声→周波数→色→命名のフローを反映。
     """
     session_id: str
     big5_score: Big5Score
 
     # アーキタイプ情報（YAMLから取得）
-    archetype_code: str = ""          # 例: "SOLAR_HERALD"
-    archetype_name: str = ""          # 例: "太陽の伝道者"
+    archetype_code: str = ""          # 例: "GUREN_GUIDE"
+    archetype_name: str = ""          # 例: "紅蓮の導き手"
     archetype_emoji: str = ""         # 例: "🔥"
     archetype_tagline: str = ""       # キャッチコピー
-    archetype_rarity: str = ""        # 希少度テキスト
+    archetype_rarity: str = ""        # 希少度テキスト（例: "100人に8人"）
 
-    # 詳細診断テキスト（YAMLから取得）
-    hidden_talent_title: str = ""
-    hidden_talent_description: str = ""
-    hidden_talent_examples: list = field(default_factory=list)
+    # ============================================================
+    # 色・周波数情報（言霊テック世界観）
+    # ============================================================
+    soul_color_name: str = ""         # 和名（例: "紅蓮"）
+    soul_color_reading: str = ""      # 読み（例: "ぐれん"）
+    soul_color_hex: str = ""          # 基本色HEX（例: "#C0392B"）
+    personal_color_hex: str = ""      # パーソナライズ色HEX（F0/HNR/RMS微調整）
+    note_name: str = ""               # 音名（例: "A3"）
+    note_frequency_hz: float = 0.0    # 最寄り音階の周波数
+    chakra_number: int = 0            # チャクラ番号（1-7）
+    chakra_name: str = ""             # チャクラ名
+    polarity: str = ""                # "陽" or "陰"
 
-    mission_title: str = ""
-    mission_description: str = ""
-    mission_past_interpretation: str = ""
-
-    shadow_title: str = ""
-    shadow_description: str = ""
-
-    resonance_compatible_types: list = field(default_factory=list)
-    resonance_compatible_description: str = ""
-    resonance_chakra_activation: str = ""
-
-    universe_message_title: str = ""
-    universe_message_description: str = ""
-
-    keys_to_bloom: list = field(default_factory=list)
+    # ============================================================
+    # 鑑定テキスト（YAMLから取得 — テキスト直接格納）
+    # ============================================================
+    hidden_talent: str = ""           # 隠れた才能テキスト
+    mission: str = ""                 # 魂の使命テキスト
+    shadow: str = ""                  # シャドウ（使いきれていない力）テキスト
+    resonance: str = ""               # 共鳴テキスト
+    universe_message: str = ""        # 宇宙からのメッセージ
+    keys_to_bloom: str = ""           # 才能を開花させるカギ
 
     # 元素情報
     dominant_elements: list = field(default_factory=list)
@@ -161,10 +166,10 @@ class DiagnosisResult:
 
     # メタデータ
     diagnosed_at: datetime = field(default_factory=datetime.now)
-    worldview_theme: str = "elements_v1"
+    worldview_theme: str = "kotodama_v1"
 
     # 声紋コード（ユニークID表示用）
-    voice_code_id: str = ""  # 例: "#A7-432Hz"
+    voice_code_id: str = ""  # 例: "#A3-220Hz-藍"
 
     def to_dict(self) -> dict:
         return {
@@ -175,29 +180,28 @@ class DiagnosisResult:
             "archetype_emoji": self.archetype_emoji,
             "archetype_tagline": self.archetype_tagline,
             "archetype_rarity": self.archetype_rarity,
-            "hidden_talent": {
-                "title": self.hidden_talent_title,
-                "description": self.hidden_talent_description,
-                "examples": self.hidden_talent_examples,
+            # 色・周波数情報
+            "soul_color": {
+                "name": self.soul_color_name,
+                "reading": self.soul_color_reading,
+                "hex": self.soul_color_hex,
+                "personal_hex": self.personal_color_hex,
             },
-            "mission": {
-                "title": self.mission_title,
-                "description": self.mission_description,
-                "past_interpretation": self.mission_past_interpretation,
+            "note": {
+                "name": self.note_name,
+                "frequency_hz": self.note_frequency_hz,
             },
-            "shadow": {
-                "title": self.shadow_title,
-                "description": self.shadow_description,
+            "chakra": {
+                "number": self.chakra_number,
+                "name": self.chakra_name,
             },
-            "resonance": {
-                "compatible_types": self.resonance_compatible_types,
-                "compatible_description": self.resonance_compatible_description,
-                "chakra_activation": self.resonance_chakra_activation,
-            },
-            "universe_message": {
-                "title": self.universe_message_title,
-                "description": self.universe_message_description,
-            },
+            "polarity": self.polarity,
+            # 鑑定テキスト
+            "hidden_talent": self.hidden_talent,
+            "mission": self.mission,
+            "shadow": self.shadow,
+            "resonance": self.resonance,
+            "universe_message": self.universe_message,
             "keys_to_bloom": self.keys_to_bloom,
             "dominant_elements": self.dominant_elements,
             "voice_code_id": self.voice_code_id,

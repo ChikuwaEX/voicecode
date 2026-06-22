@@ -177,9 +177,12 @@ async def _process_audio_and_push(user_id: str, message_id: str) -> None:
             report_download_url=download_url,
             rarity=diagnosis.archetype_rarity,
         )
+        # 色名を含めた新しいメッセージ形式
+        color_name = getattr(diagnosis, 'soul_color_name', '')
+        alt = f"✦ 声紋リーディング完了｜あなたの声の色は「{color_name}」— {diagnosis.archetype_name}"
         line_client.push_flex(
             user_id=user_id,
-            alt_text=f"✦ 声紋解析完了｜あなたは「{diagnosis.archetype_name}」です",
+            alt_text=alt,
             flex_container=flex
         )
 

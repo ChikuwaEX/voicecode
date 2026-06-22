@@ -868,6 +868,40 @@
             text-decoration: none;
             z-index: 100;
         }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* ========== RESPONSIVE DESIGN (スマホ最適化) ========== */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .page { padding: 25px 15px; margin: 10px auto; min-height: auto; height: auto; box-shadow: none; page-break-after: always; }
+            
+            /* カラムを1列に */
+            .cover-meta-grid { grid-template-columns: 1fr 1fr; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .matrix-grid { grid-template-columns: 1fr; }
+            .plan-grid { grid-template-columns: 1fr; gap: 12px; }
+            .resources-grid { grid-template-columns: 1fr; }
+            .chart-grid { grid-template-columns: 1fr; }
+            
+            /* キーカードの数値部分を縮小 */
+            .key-card { grid-template-columns: 40px 1fr; }
+            
+            /* フォントサイズ最適化 */
+            .cover-title { font-size: 16px; }
+            .cover-archetype-name { font-size: 22px; }
+            .section-num { font-size: 24px; }
+            .section-en { font-size: 14px; }
+            .section-ja { font-size: 11px; }
+            
+            /* チャートの高さを確保 */
+            canvas { min-height: 220px !important; }
+        }
     </style>
 </head>
 <body>
@@ -1016,7 +1050,7 @@
         </div>
 
         <!-- Row 1: Big5レーダー + 音声品質スコアゲージ -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div class="chart-grid">
 
             <!-- Big5レーダーチャート -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 20px;">
@@ -1038,7 +1072,7 @@
         </div>
 
         <!-- Row 2: ピッチ分布 + 5元素ドーナツ -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div class="chart-grid">
 
             <!-- ピッチ（F0）分布バーチャート -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 20px;">
@@ -1060,7 +1094,7 @@
         </div>
 
         <!-- Row 3: MFCC係数 + 音響特徴量水平バー -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div class="chart-grid">
 
             <!-- MFCC係数バーチャート -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 20px;">

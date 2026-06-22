@@ -176,6 +176,12 @@ async def _process_audio_and_push(user_id: str, message_id: str) -> None:
             report_view_url=view_url,
             report_download_url=download_url,
             rarity=diagnosis.archetype_rarity,
+            soul_color_name=getattr(diagnosis, 'soul_color_name', ''),
+            soul_color_hex=getattr(diagnosis, 'soul_color_hex', '#D4AF37'),
+            personal_color_hex=getattr(diagnosis, 'personal_color_hex', '#D4AF37'),
+            tagline=getattr(diagnosis, 'archetype_tagline', ''),
+            note_name=getattr(diagnosis, 'note_name', ''),
+            note_frequency_hz=getattr(diagnosis, 'note_frequency_hz', 0.0),
         )
         # 色名を含めた新しいメッセージ形式
         color_name = getattr(diagnosis, 'soul_color_name', '')

@@ -889,7 +889,16 @@
         <div class="cover-title">SOUL BLUEPRINT</div>
         <div class="cover-archetype-name">{{ archetype.name }}</div>
         <div class="cover-tagline">{{ archetype.tagline }}</div>
+        <div style="margin: 16px auto; width: 60px; height: 60px; border-radius: 50%; background: {{ personal_color_hex }}; box-shadow: 0 0 30px {{ personal_color_hex }}60;"></div>
         <div class="cover-meta-grid">
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">Voice Color</div>
+                <div class="cover-meta-value" style="color: {{ soul_color_hex }}">{{ soul_color_name }}</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">Frequency</div>
+                <div class="cover-meta-value">{{ note_name }} / {{ note_frequency_hz }}Hz</div>
+            </div>
             <div class="cover-meta-item">
                 <div class="cover-meta-label">Recipient</div>
                 <div class="cover-meta-value">{{ user_name }}</div>
@@ -968,12 +977,12 @@
             </div>
             <div class="summary-card">
                 <div class="summary-card-label">Core Strength</div>
-                <div class="summary-card-value">{{ archetype.hidden_talent.title | truncate(25) }}</div>
+                <div class="summary-card-value">{{ archetype.hidden_talent | truncate(25) }}</div>
                 <div class="summary-card-desc">あなたが世界に差し出すべき最大の才能</div>
             </div>
             <div class="summary-card">
                 <div class="summary-card-label">Soul Mission</div>
-                <div class="summary-card-value">{{ archetype.mission.title | truncate(25) }}</div>
+                <div class="summary-card-value">{{ archetype.mission | truncate(25) }}</div>
                 <div class="summary-card-desc">魂が選んで生まれてきた根本的な使命</div>
             </div>
         </div>
@@ -1152,23 +1161,9 @@
         </div>
 
         <div class="content-block">
-            <h3>{{ archetype.hidden_talent.title }}</h3>
-            <div class="content-text">{{ archetype.hidden_talent.description }}</div>
+            <h3>あなたの隠れた才能</h3>
+            <div class="content-text" style="white-space: pre-line;">{{ archetype.hidden_talent }}</div>
         </div>
-
-        {% if archetype.hidden_talent.examples %}
-        <div style="margin-top: 30px;">
-            <div style="font-family: var(--sans); font-size: 10px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 16px;">あなたに当てはまる可能性が高い具体的なシーン</div>
-            <div class="example-list">
-                {% for ex in archetype.hidden_talent.examples %}
-                <div class="example-item">
-                    <span class="example-icon">◆</span>
-                    <span class="example-text">{{ ex }}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
 
@@ -1187,16 +1182,9 @@
         </div>
 
         <div class="content-block">
-            <h3>{{ archetype.mission.title }}</h3>
-            <div class="content-text">{{ archetype.mission.description }}</div>
+            <h3>ソウルミッション</h3>
+            <div class="content-text" style="white-space: pre-line;">{{ archetype.mission }}</div>
         </div>
-
-        {% if archetype.mission.past_interpretation %}
-        <div class="content-block" style="margin-top: 30px;">
-            <h3>過去の出来事の霊的解釈</h3>
-            <div class="content-text">{{ archetype.mission.past_interpretation }}</div>
-        </div>
-        {% endif %}
 
 <!-- ============================== -->
 <!-- PAGE 8: RESONANCE MAP          -->
@@ -1210,30 +1198,9 @@
             </div>
         </div>
 
-        <div class="content-text" style="margin-bottom: 24px;">
-            すべての魂は固有の周波数を持ち、特定のアーキタイプとは自然に共鳴し、他のアーキタイプとは摩擦を生じさせます。これは優劣ではなく、電気の＋と－の関係のように、それぞれが宇宙的役割を担っています。以下は、あなたの声紋が示す「共鳴の地図」です。
-        </div>
-
-        <div class="resonance-grid">
-            {% for ctype in archetype.resonance.compatible_types %}
-            <div class="resonance-card compatible">
-                <div class="resonance-card-label">✦ 高共鳴タイプ</div>
-                <div class="resonance-type-name">{{ ctype }}</div>
-                <div class="resonance-desc">{{ archetype.resonance.compatible_description }}</div>
-            </div>
-            {% endfor %}
-            {% for ctype in archetype.resonance.challenging_types %}
-            <div class="resonance-card challenging">
-                <div class="resonance-card-label">⚡ 摩擦・成長タイプ</div>
-                <div class="resonance-type-name">{{ ctype }}</div>
-                <div class="resonance-desc">このタイプとの関係は最初は摩擦を感じやすいですが、その摩擦こそが双方の成長を最も加速させる触媒となります。避けるのではなく、意識的に関わることで魂の進化が促されます。</div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <div class="freq-analysis-text" style="margin-top: 20px;">
-            <strong>チャクラ活性化プロトコル</strong><br>
-            {{ archetype.resonance.chakra_activation }}
+        <div class="content-block">
+            <h3>共鳴マップ</h3>
+            <div class="content-text" style="white-space: pre-line;">{{ archetype.resonance }}</div>
         </div>
     </div>
 </div>
@@ -1253,8 +1220,8 @@
         </div>
 
         <div class="content-block">
-            <h3>{{ archetype.shadow.title }}</h3>
-            <div class="content-text">{{ archetype.shadow.description }}</div>
+            <h3>まだ解放されていない力</h3>
+            <div class="content-text" style="white-space: pre-line;">{{ archetype.shadow }}</div>
         </div>
 
         <div class="element-detail-grid" style="margin-top: 24px;">
@@ -1319,8 +1286,8 @@
         </div>
 
         <div class="content-block">
-            <h3>{{ archetype.universe_message_2026.title }}</h3>
-            <div class="content-text">{{ archetype.universe_message_2026.description }}</div>
+            <h3>宇宙からのメッセージ</h3>
+            <div class="content-text" style="white-space: pre-line;">{{ archetype.universe_message }}</div>
         </div>
     </div>
 
@@ -1333,16 +1300,9 @@
             </div>
         </div>
 
-        <div class="key-cards">
-            {% for key in archetype.keys_to_bloom %}
-            <div class="key-card">
-                <div class="key-card-num">{{ loop.index }}</div>
-                <div class="key-card-body">
-                    <div class="key-card-title">{{ key.title }}</div>
-                    <div class="key-card-desc">{{ key.description }}</div>
-                </div>
-            </div>
-            {% endfor %}
+        <div class="content-block">
+            <h3>才能を開花させる3つのカギ</h3>
+            <div class="content-text" style="white-space: pre-line;">{{ archetype.keys_to_bloom }}</div>
         </div>
     </div>
 </div>
@@ -1463,13 +1423,13 @@
             <div class="resource-card">
                 <span class="resource-icon">💎</span>
                 <div class="resource-category">Crystal</div>
-                <div class="resource-title">{{ archetype.element_crystal }}</div>
+                <div class="resource-title">{{ soul_color_name }}のクリスタル</div>
                 <div class="resource-desc">あなたの支配元素と共鳴するクリスタル。左手に持ち、声紋コード「{{ voice_code_id }}」を唱えながら瞑想することで、エネルギーの増幅効果が高まります。</div>
             </div>
             <div class="resource-card">
                 <span class="resource-icon">🎵</span>
                 <div class="resource-category">Healing Sound</div>
-                <div class="resource-title">{{ archetype.element_note }}</div>
+                <div class="resource-title">{{ note_name }} ({{ note_frequency_hz }}Hz)</div>
                 <div class="resource-desc">あなたのチャクラシステムと共鳴するヒーリング周波数。就寝前30分間の聴取で、深層のエネルギーリセットが促進されます。</div>
             </div>
             <div class="resource-card">
@@ -1487,7 +1447,7 @@
             <div class="resource-card">
                 <span class="resource-icon">🧘</span>
                 <div class="resource-category">Meditation Style</div>
-                <div class="resource-title">{{ archetype.element_chakra }}</div>
+                <div class="resource-title">第{{ chakra_number }}チャクラ（{{ chakra_name }}）</div>
                 <div class="resource-desc">特定のチャクラに意識を集中したチャクラ瞑想が特に効果的です。Insightタイマー等のアプリを用いた、誘導付き瞑想から始めることをお勧めします。</div>
             </div>
             <div class="resource-card">

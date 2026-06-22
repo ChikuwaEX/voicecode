@@ -257,6 +257,12 @@ def build_result_flex(
     report_view_url: str,
     report_download_url: str,
     rarity: str,
+    soul_color_name: str = "",
+    soul_color_hex: str = "#D4AF37",
+    personal_color_hex: str = "#D4AF37",
+    tagline: str = "",
+    note_name: str = "",
+    note_frequency_hz: float = 0.0,
 ) -> dict:
     """診断結果Flexメッセージ"""
     return {
@@ -302,11 +308,48 @@ def build_result_flex(
                 {
                     "type": "text",
                     "text": archetype_name,
-                    "color": "#F0D060",
+                    "color": soul_color_hex,
                     "size": "xl",
                     "align": "center",
                     "weight": "bold",
                     "wrap": True
+                },
+                *([
+                    {
+                        "type": "text",
+                        "text": tagline,
+                        "color": "#9090B0",
+                        "size": "sm",
+                        "align": "center",
+                        "wrap": True,
+                        "margin": "sm"
+                    }
+                ] if tagline else []),
+                {
+                    "type": "box",
+                    "layout": "horizontal",
+                    "justifyContent": "center",
+                    "alignItems": "center",
+                    "margin": "md",
+                    "spacing": "sm",
+                    "contents": [
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "width": "16px",
+                            "height": "16px",
+                            "cornerRadius": "8px",
+                            "backgroundColor": personal_color_hex,
+                            "contents": []
+                        },
+                        {
+                            "type": "text",
+                            "text": "Personal Color",
+                            "color": "#4A4A6A",
+                            "size": "xxs",
+                            "flex": 0
+                        }
+                    ]
                 },
                 {
                     "type": "text",
@@ -343,6 +386,56 @@ def build_result_flex(
                         }
                     ]
                 },
+                *([
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "margin": "sm",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "声の色",
+                                "color": "#4A4A6A",
+                                "size": "xs",
+                                "flex": 1
+                            },
+                            {
+                                "type": "text",
+                                "text": soul_color_name,
+                                "color": soul_color_hex,
+                                "size": "xs",
+                                "align": "end",
+                                "flex": 2,
+                                "weight": "bold"
+                            }
+                        ]
+                    }
+                ] if soul_color_name else []),
+                *([
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "margin": "sm",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "周波数",
+                                "color": "#4A4A6A",
+                                "size": "xs",
+                                "flex": 1
+                            },
+                            {
+                                "type": "text",
+                                "text": f"{note_name} / {note_frequency_hz:.1f}Hz",
+                                "color": "#C8C0E0",
+                                "size": "xs",
+                                "align": "end",
+                                "flex": 2,
+                                "weight": "bold"
+                            }
+                        ]
+                    }
+                ] if note_name else []),
                 {
                     "type": "text",
                     "text": "12ページのプレミアムレポートが生成されました。科学的音響分析・チャクラ診断・30日間プラン等を収録しています。",

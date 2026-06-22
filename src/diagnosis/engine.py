@@ -41,42 +41,38 @@ logger = logging.getLogger(__name__)
 # ========================================================
 
 # 外向性 (Extraversion) スコアの重み
-# 最重要: RMSエネルギー(音量) r=0.38〜0.40 (Mairesse 2007)
+# 独自指標: RMSエネルギー（音量）、話速
 EXTRAVERSION_WEIGHTS = {
-    "rms_energy_norm": 0.40,        # 音量 - 最も信頼性高い指標
-    "speech_rate_norm": 0.30,       # 話速
-    "f0_std_norm": 0.20,            # ピッチ変動
-    "pause_ratio_inv_norm": 0.10,   # ポーズ少ない（逆数）
+    "rms_energy_norm": 0.50,        # 音量 - 最も信頼性高い指標
+    "speech_rate_norm": 0.50,       # 話速
 }
 
 # 神経症傾向 (Neuroticism) スコアの重み
-# Jitter・Shimmer・HNRの逆数が主要指標
+# 独自指標: ジッター、シマー
 NEUROTICISM_WEIGHTS = {
-    "jitter_norm": 0.35,            # ジッター（高いほど神経症傾向高）
-    "shimmer_norm": 0.35,           # シマー（高いほど神経症傾向高）
-    "hnr_inv_norm": 0.20,           # HNR低い（逆数）
-    "pause_ratio_norm": 0.10,       # ポーズ多い
+    "jitter_norm": 0.50,            # ジッター（高いほど神経症傾向高）
+    "shimmer_norm": 0.50,           # シマー（高いほど神経症傾向高）
 }
 
 # 開放性 (Openness) スコアの重み
+# 独自指標: F0変動、スペクトル重心変動
 OPENNESS_WEIGHTS = {
-    "f0_std_norm": 0.40,            # ピッチ変動が豊か
-    "spectral_centroid_std_norm": 0.30,  # スペクトル重心の変動
-    "mfcc_variability_norm": 0.30,  # MFCC変動（声道の多様性）
+    "f0_std_norm": 0.50,            # ピッチ変動が豊か
+    "spectral_centroid_std_norm": 0.50,  # スペクトル重心の変動
 }
 
 # 誠実性 (Conscientiousness) スコアの重み
+# 独自指標: HNR（明瞭さ）、ポーズ比率逆数（途切れない）
 CONSCIENTIOUSNESS_WEIGHTS = {
-    "speech_rate_norm": 0.35,       # 安定した話速
-    "hnr_norm": 0.35,               # HNR高い（明瞭な声）
-    "jitter_inv_norm": 0.30,        # ジッター低い（安定）
+    "hnr_norm": 0.50,               # HNR高い（明瞭な声）
+    "pause_ratio_inv_norm": 0.50,   # ポーズ少ない（途切れない発話）
 }
 
 # 協調性 (Agreeableness) スコアの重み
+# 独自指標: スペクトル重心逆数（温かさ）、RMS変動逆数（安定）
 AGREEABLENESS_WEIGHTS = {
-    "spectral_centroid_inv_norm": 0.40,  # スペクトル重心低め（温かい声）
-    "f0_std_norm": 0.30,                 # 適度なピッチ変動
-    "hnr_norm": 0.30,                    # HNR高い（清潔感のある声）
+    "spectral_centroid_inv_norm": 0.50,  # スペクトル重心低め（温かい声）
+    "rms_std_inv_norm": 0.50,            # 音量変動少ない（穏やか）
 }
 
 # ========================================================
@@ -232,42 +228,57 @@ class DiagnosisEngine(IDiagnosisEngine):
 
         extraversion = (
             norm["rms_energy_norm"] * EXTRAVERSION_WEIGHTS["rms_energy_norm"] +
-            norm["speech_rate_norm"] * EXTRAVERSION_WEIGHTS["speech_rate_norm"] +
-            norm["f0_std_norm"] * EXTRAVERSION_WEIGHTS["f0_std_norm"] +
-            norm["pause_ratio_inv_norm"] * EXTRAVERSION_WEIGHTS["pause_ratio_inv_norm"]
+            norm["speech_rate_norm"] * EXTRAVERSION_WEIGHTS["speech_rate_norm"]
         )
 
         neuroticism = (
             norm["jitter_norm"] * NEUROTICISM_WEIGHTS["jitter_norm"] +
-            norm["shimmer_norm"] * NEUROTICISM_WEIGHTS["shimmer_norm"] +
-            norm["hnr_inv_norm"] * NEUROTICISM_WEIGHTS["hnr_inv_norm"] +
-            norm["pause_ratio_norm"] * NEUROTICISM_WEIGHTS["pause_ratio_norm"]
+            norm["shimmer_norm"] * NEUROTICISM_WEIGHTS["shimmer_norm"]
         )
 
         openness = (
             norm["f0_std_norm"] * OPENNESS_WEIGHTS["f0_std_norm"] +
-            norm["spectral_centroid_std_norm"] * OPENNESS_WEIGHTS["spectral_centroid_std_norm"] +
-            norm["mfcc_variability_norm"] * OPENNESS_WEIGHTS["mfcc_variability_norm"]
+            norm["spectral_centroid_std_norm"] * OPENNESS_WEIGHTS["spectral_centroid_std_norm"]
         )
 
         conscientiousness = (
-            norm["speech_rate_norm"] * CONSCIENTIOUSNESS_WEIGHTS["speech_rate_norm"] +
             norm["hnr_norm"] * CONSCIENTIOUSNESS_WEIGHTS["hnr_norm"] +
-            norm["jitter_inv_norm"] * CONSCIENTIOUSNESS_WEIGHTS["jitter_inv_norm"]
+            norm["pause_ratio_inv_norm"] * CONSCIENTIOUSNESS_WEIGHTS["pause_ratio_inv_norm"]
         )
 
         agreeableness = (
             norm["spectral_centroid_inv_norm"] * AGREEABLENESS_WEIGHTS["spectral_centroid_inv_norm"] +
-            norm["f0_std_norm"] * AGREEABLENESS_WEIGHTS["f0_std_norm"] +
-            norm["hnr_norm"] * AGREEABLENESS_WEIGHTS["hnr_norm"]
+            norm["rms_std_inv_norm"] * AGREEABLENESS_WEIGHTS["rms_std_inv_norm"]
         )
+        # ==============================================
+        # 因子間バイアス補正（ランク正規化）
+        # ==============================================
+        # 各因子の重み計算で使う特徴量が異なるため、
+        # 特定の因子が構造的に高くなる傾向がある。
+        # 例: 誠実性(C)はHNR+speech_rate+jitter_invの全てが
+        #     中央値寄りになりやすく、常に0.5付近に収束する。
+        # これを補正するため、5因子を順位ベースで再正規化する。
+        # 「声の個性のどの側面が最も際立っているか」を判定。
+        raw_scores = {
+            "openness": openness,
+            "conscientiousness": conscientiousness,
+            "extraversion": extraversion,
+            "agreeableness": agreeableness,
+            "neuroticism": neuroticism,
+        }
+        # 各因子を0-1内で相対正規化（min-max rescale）
+        vals = list(raw_scores.values())
+        s_min = min(vals)
+        s_max = max(vals)
+        spread = s_max - s_min if s_max > s_min else 1.0
+        normalized = {k: (v - s_min) / spread for k, v in raw_scores.items()}
 
         return Big5Score(
-            openness=float(openness),
-            conscientiousness=float(conscientiousness),
-            extraversion=float(extraversion),
-            agreeableness=float(agreeableness),
-            neuroticism=float(neuroticism),
+            openness=float(normalized["openness"]),
+            conscientiousness=float(normalized["conscientiousness"]),
+            extraversion=float(normalized["extraversion"]),
+            agreeableness=float(normalized["agreeableness"]),
+            neuroticism=float(normalized["neuroticism"]),
         )
 
     def _normalize_features(self, a: AudioAnalysisResult) -> dict:
@@ -300,6 +311,7 @@ class DiagnosisEngine(IDiagnosisEngine):
 
         # シマー正規化（0〜10%の範囲、正常値は3%以下）
         shimmer_norm = norm_clamp(a.shimmer_local, 0, 10.0)
+        shimmer_inv_norm = 1.0 - shimmer_norm
 
         # HNR正規化（0〜30dBの範囲、15dB以上が正常）
         hnr_norm = norm_clamp(a.hnr_db, 0, 30)
@@ -314,6 +326,10 @@ class DiagnosisEngine(IDiagnosisEngine):
         mfcc_variability = sum(abs(v) for v in a.mfcc_std) / max(len(a.mfcc_std), 1)
         mfcc_variability_norm = norm_clamp(mfcc_variability, 0, 50)
 
+        # RMS変動性（音量の起伏）
+        rms_std_norm = norm_clamp(a.rms_std, 0, 0.05)
+        rms_std_inv_norm = 1.0 - rms_std_norm
+
         return {
             "rms_energy_norm": rms_norm,
             "speech_rate_norm": speech_rate_norm,
@@ -323,12 +339,15 @@ class DiagnosisEngine(IDiagnosisEngine):
             "jitter_norm": jitter_norm,
             "jitter_inv_norm": jitter_inv_norm,
             "shimmer_norm": shimmer_norm,
+            "shimmer_inv_norm": shimmer_inv_norm,
             "hnr_norm": hnr_norm,
             "hnr_inv_norm": hnr_inv_norm,
             "spectral_centroid_norm": spectral_centroid_norm,
             "spectral_centroid_inv_norm": spectral_centroid_inv_norm,
             "spectral_centroid_std_norm": spectral_centroid_std_norm,
             "mfcc_variability_norm": mfcc_variability_norm,
+            "rms_std_norm": rms_std_norm,
+            "rms_std_inv_norm": rms_std_inv_norm,
         }
 
     # ======================================================================

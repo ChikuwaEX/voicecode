@@ -174,6 +174,18 @@ async def admin_dashboard(_: None = Depends(_check_admin)):
     return html
 
 
+@router.get("/config/public")
+async def public_config():
+    """
+    フロントエンドが参照する公開設定値を返す。
+    認証不要・機密情報なし。LINE_ADD_FRIEND_URL など。
+    """
+    return JSONResponse({
+        "line_add_friend_url": os.getenv("LINE_ADD_FRIEND_URL", ""),
+        "diagnosis_price_yen": int(os.getenv("DIAGNOSIS_PRICE_YEN", "3000")),
+    })
+
+
 @router.get("/admin/stats", include_in_schema=False)
 async def admin_stats(_: None = Depends(_check_admin)):
     """管理用統計 JSON"""

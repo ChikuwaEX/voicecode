@@ -111,4 +111,62 @@ Cursor (claude-sonnet-4-5)
 
 ---
 
+## 2026-06-22（インフラ整備・テスト修正・管理ダッシュボード実装）
+
+### 担当AI
+Cursor (claude-sonnet-4-5)
+
+### 完了事項
+
+#### テスト修正
+- `tests/test_diagnosis_engine.py` を kotodama_v1 に完全対応
+  - `worldview_theme="elements_v1"` → `"kotodama_v1"` 修正（FileNotFoundError 解消）
+  - 旧アーキタイプコード（`SOLAR_HERALD` 等）を現行10種に置き換え
+  - フィールド名 `hidden_talent_title` 等 → `hidden_talent` 等（フラット形式）に修正
+  - 28テスト全 PASS
+
+#### 設定修正
+- `src/config.py`: `WORLDVIEW_THEME` デフォルトを `elements_v1` → `kotodama_v1` に修正
+- Railway 環境変数 `WORLDVIEW_THEME` も `kotodama_v1` に更新済み
+
+#### SQLite セッションストア永続化
+- `src/session/store.py`: インメモリ dict → SQLite（Python 標準 `sqlite3`、追加ライブラリ不要）
+  - サーバー再起動・プロセス落ち後もセッションデータが保持される
+  - `get_all()` / `count_stats()` を追加（管理ダッシュボード向け）
+
+#### 定期クリーンアップ（`src/main.py`）
+- 起動時に SQLite を自動初期化
+- `_periodic_cleanup()` を asyncio バックグラウンドタスクとして起動（1時間ごと）
+  - 期限切れセッション（48時間以上）削除
+  - `outputs/` の古いファイル（72時間以上）削除
+  - `uploads/` の残留ファイル（2時間以上）削除
+
+#### ブラウザ録音 WebUI（`src/api/record.py`）新規
+- `GET /record` — ダーク神秘系デザインの録音ページ（LINE内ブラウザ・スマホ対応）
+  - MediaRecorder API でブラウザ録音
+  - 波形アニメーション・タイマー表示
+  - 録音後アップロード → 診断パイプライン → 結果をその場に表示
+- `POST /api/v1/record/submit` — 音声受信 → 診断 → JSONレスポンス
+
+#### 管理者ダッシュボード（`src/api/admin.py`）新規
+- `GET /admin` — Basic Auth 保護のダッシュボード HTML
+  - 総診断数・決済済み数・ストレージ使用量カード
+  - 直近50セッション一覧（アーキタイプ・決済状態・LINE ID・作成日時）
+- `GET /admin/stats` — 統計情報 JSON
+- 認証情報: 環境変数 `ADMIN_USERNAME` / `ADMIN_PASSWORD`（デフォルト: admin/voicecode）
+
+### Railway 本番への反映
+- `git push origin main` 完了 → 自動デプロイ済み
+- 本番 URL: `https://voicecode-production.up.railway.app`
+- 管理ダッシュボード: `https://voicecode-production.up.railway.app/admin`
+- 録音ページ: `https://voicecode-production.up.railway.app/record`
+
+### 次のアクション（Phase E）
+- [ ] SNS広告コンテンツの設計・投稿戦略
+- [ ] LINEへの誘導フロー設計（公式LINE友達追加〜初診断まで）
+- [ ] ベータテスター向けキャンペーン設計
+- [ ] Railway PostgreSQL 移行（本格運用前に SQLite から置き換え推奨）
+
+---
+
 *ログは作業のたびに追記してください*

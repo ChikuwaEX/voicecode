@@ -750,7 +750,7 @@
         <li><a href="#pricing">料金</a></li>
         <li><a href="#faq">よくある質問</a></li>
     </ul>
-    <a href="/app" class="nav-cta" id="navCta">🎤 声紋診断を受ける</a>
+    <a href="/record" class="nav-cta" id="navCta">🎤 声紋診断を受ける</a>
 </nav>
 
 <!-- ====== HERO ====== -->
@@ -771,7 +771,7 @@
         </p>
 
         <div class="hero-buttons">
-            <a href="/app" class="btn-primary" id="heroMainCta">
+            <a href="/record" class="btn-primary" id="heroMainCta">
                 🎤 今すぐ声紋診断を受ける
             </a>
             <a href="#how" class="btn-secondary">
@@ -1025,7 +1025,7 @@
                 <li>PDFダウンロード永続保存</li>
             </ul>
 
-            <a href="/app" class="btn-primary" style="width:100%; justify-content:center; font-size:16px;" id="pricingCta">
+            <a href="/record" class="btn-primary" style="width:100%; justify-content:center; font-size:16px;" id="pricingCta">
                 🎤 声紋診断を今すぐ受ける
             </a>
 
@@ -1111,7 +1111,7 @@
     <p class="cta-sub" style="position:relative;z-index:1;">
         声を送るだけ。今すぐ魂のブループリントを手に入れましょう。
     </p>
-    <a href="/app" class="btn-primary" style="font-size:16px;padding:20px 52px;position:relative;z-index:1;" id="finalCta">
+    <a href="/record" class="btn-primary" style="font-size:16px;padding:20px 52px;position:relative;z-index:1;" id="finalCta">
         🎤 声紋診断を受ける（¥3,000）
     </a>
 </div>
@@ -1161,6 +1161,24 @@
             child.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         });
     });
+
+    // LINE友達追加URLが設定されている場合、CTAをLINEへの誘導に切り替える
+    // サーバーから /api/v1/config/public を取得して LINE_ADD_FRIEND_URL を確認
+    fetch('/api/v1/config/public')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && data.line_add_friend_url) {
+          const url = data.line_add_friend_url;
+          ['navCta','heroMainCta','pricingCta','finalCta'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+              el.href = url;
+              el.target = '_blank';
+            }
+          });
+        }
+      })
+      .catch(() => {});
 
     // ナビゲーション スクロール時の背景強化
     window.addEventListener('scroll', () => {

@@ -112,34 +112,48 @@ def push_flex(user_id: str, alt_text: str, flex_container: dict) -> None:
 # ==============================================================
 
 def build_welcome_flex() -> dict:
-    """フォロー時の歓迎Flexメッセージ"""
+    """
+    フォロー時の歓迎Flexメッセージ。
+
+    ユーザーが登録直後に「何をすればいいか」を瞬時に理解できるよう、
+    3ステップを視覚的に提示し、送信への心理的ハードルを下げる設計。
+    """
+    base_url = _BASE_URL
     return {
         "type": "bubble",
-        "size": "kilo",
+        "size": "mega",
         "header": {
             "type": "box",
             "layout": "vertical",
-            "backgroundColor": "#08080F",
-            "paddingAll": "20px",
+            "backgroundColor": "#07070E",
+            "paddingAll": "24px",
             "contents": [
                 {
                     "type": "text",
                     "text": "V O I C E C O D E",
                     "color": "#D4AF37",
-                    "size": "xs",
+                    "size": "xxs",
                     "align": "center",
-                    "letterSpacing": "6px",
+                    "letterSpacing": "8px",
                     "weight": "bold"
                 },
                 {
                     "type": "text",
-                    "text": "あなたの声に、\n宇宙の答えがある。",
+                    "text": "あなたの声に、\n魂の設計図が宿る。",
                     "color": "#E8E0FF",
-                    "size": "lg",
+                    "size": "xl",
                     "align": "center",
                     "weight": "bold",
                     "wrap": True,
                     "margin": "md"
+                },
+                {
+                    "type": "text",
+                    "text": "声紋×AI × 1200年の言霊の叡智",
+                    "color": "#7A7A9A",
+                    "size": "xxs",
+                    "align": "center",
+                    "margin": "sm"
                 }
             ]
         },
@@ -148,34 +162,45 @@ def build_welcome_flex() -> dict:
             "layout": "vertical",
             "backgroundColor": "#0D0D1A",
             "paddingAll": "20px",
-            "spacing": "md",
+            "spacing": "lg",
             "contents": [
+                # --- 3ステップガイド ---
                 {
                     "type": "text",
-                    "text": "友達追加ありがとうございます✨\nVOICECODEは、あなたの声の周波数を科学的に分析し、魂の使命・才能・運命パターンをプレミアムレポートでお届けするサービスです。",
-                    "color": "#9090B0",
-                    "size": "sm",
-                    "wrap": True
-                },
-                {
-                    "type": "separator",
-                    "margin": "md",
-                    "color": "#D4AF3740"
-                },
-                {
-                    "type": "text",
-                    "text": "📋 診断の流れ",
+                    "text": "✦ たった3ステップで完了",
                     "color": "#D4AF37",
                     "size": "sm",
-                    "weight": "bold",
+                    "weight": "bold"
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "md",
+                    "contents": [
+                        _welcome_step("01", "🎤", "声を送る",
+                                      "このトークに「音声メッセージ」を送るだけ。30秒〜2分が理想です。"),
+                        _welcome_step("02", "🔮", "AIが声紋解析",
+                                      "周波数・リズム・倍音を解析。約30秒で完了します。"),
+                        _welcome_step("03", "📄", "12ページのレポートを受け取る",
+                                      "魂の使命・才能・シャドウ・開花のカギを詳細にお届けします。"),
+                    ]
+                },
+                # --- ソーシャルプルーフ ---
+                {
+                    "type": "separator",
+                    "color": "#D4AF3730",
                     "margin": "md"
                 },
                 {
-                    "type": "text",
-                    "text": "① このトークに「声」を送る\n② 約30秒で音響解析完了\n③ 12ページのプレミアムレポートを受け取る",
-                    "color": "#C8C0E0",
-                    "size": "sm",
-                    "wrap": True
+                    "type": "box",
+                    "layout": "horizontal",
+                    "spacing": "md",
+                    "margin": "md",
+                    "contents": [
+                        _stat_box("10種", "の魂タイプ"),
+                        _stat_box("12P", "のレポート"),
+                        _stat_box("30秒", "で解析完了"),
+                    ]
                 }
             ]
         },
@@ -184,12 +209,13 @@ def build_welcome_flex() -> dict:
             "layout": "vertical",
             "backgroundColor": "#0D0D1A",
             "paddingAll": "16px",
+            "spacing": "sm",
             "contents": [
                 {
                     "type": "button",
                     "action": {
                         "type": "message",
-                        "label": "🎤 今すぐ声を送って診断する",
+                        "label": "🎤 音声メッセージを送って診断する",
                         "text": "診断を始める"
                     },
                     "style": "primary",
@@ -197,8 +223,20 @@ def build_welcome_flex() -> dict:
                     "height": "sm"
                 },
                 {
+                    "type": "button",
+                    "action": {
+                        "type": "uri",
+                        "label": "🌐 ブラウザから録音して診断する",
+                        "uri": f"{base_url}/record"
+                    },
+                    "style": "secondary",
+                    "color": "#2D2D4A",
+                    "height": "sm",
+                    "margin": "sm"
+                },
+                {
                     "type": "text",
-                    "text": "またはこのトークに直接「音声メッセージ」を送るだけでOK",
+                    "text": "声を送るだけでOK。今すぐ魂のブループリントを受け取りましょう。",
                     "color": "#4A4A6A",
                     "size": "xxs",
                     "align": "center",
@@ -207,6 +245,93 @@ def build_welcome_flex() -> dict:
                 }
             ]
         }
+    }
+
+
+def _welcome_step(num: str, emoji: str, title: str, desc: str) -> dict:
+    """ウェルカムFlexの3ステップ行コンポーネント"""
+    return {
+        "type": "box",
+        "layout": "horizontal",
+        "spacing": "md",
+        "alignItems": "flex-start",
+        "contents": [
+            {
+                "type": "box",
+                "layout": "vertical",
+                "width": "44px",
+                "alignItems": "center",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": emoji,
+                        "size": "xl",
+                        "align": "center"
+                    },
+                    {
+                        "type": "text",
+                        "text": num,
+                        "color": "#D4AF3780",
+                        "size": "xxs",
+                        "align": "center"
+                    }
+                ]
+            },
+            {
+                "type": "box",
+                "layout": "vertical",
+                "flex": 1,
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": title,
+                        "color": "#E8E0FF",
+                        "size": "sm",
+                        "weight": "bold",
+                        "wrap": True
+                    },
+                    {
+                        "type": "text",
+                        "text": desc,
+                        "color": "#7A7A9A",
+                        "size": "xxs",
+                        "wrap": True,
+                        "margin": "xs"
+                    }
+                ]
+            }
+        ]
+    }
+
+
+def _stat_box(value: str, label: str) -> dict:
+    """ウェルカムFlexの統計ボックスコンポーネント"""
+    return {
+        "type": "box",
+        "layout": "vertical",
+        "flex": 1,
+        "alignItems": "center",
+        "backgroundColor": "#13132A",
+        "cornerRadius": "8px",
+        "paddingAll": "10px",
+        "contents": [
+            {
+                "type": "text",
+                "text": value,
+                "color": "#D4AF37",
+                "size": "lg",
+                "weight": "bold",
+                "align": "center"
+            },
+            {
+                "type": "text",
+                "text": label,
+                "color": "#7A7A9A",
+                "size": "xxs",
+                "align": "center",
+                "wrap": True
+            }
+        ]
     }
 
 

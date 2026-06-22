@@ -51,3 +51,8 @@ MAX_PITCH_HZ = 600.0
 
 # セキュリティ：音声データ処理後の自動削除
 AUTO_DELETE_AUDIO = os.getenv("AUTO_DELETE_AUDIO", "true").lower() == "true"
+
+# マーケティング
+LINE_ADD_FRIEND_URL = os.getenv("LINE_ADD_FRIEND_URL", "")  # 例: https://lin.ee/XXXXXXX
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "voicecode")

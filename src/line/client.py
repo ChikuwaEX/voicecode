@@ -263,6 +263,7 @@ def build_result_flex(
     tagline: str = "",
     note_name: str = "",
     note_frequency_hz: float = 0.0,
+    share_url: str = "",
 ) -> dict:
     """診断結果Flexメッセージ"""
     return {
@@ -468,6 +469,18 @@ def build_result_flex(
                     "type": "button",
                     "action": {
                         "type": "uri",
+                        "label": "📣 SNSでシェアする",
+                        "uri": share_url if share_url else report_view_url
+                    },
+                    "style": "primary",
+                    "color": "#2D2D4A",
+                    "height": "sm",
+                    "margin": "sm"
+                },
+                {
+                    "type": "button",
+                    "action": {
+                        "type": "uri",
                         "label": "📄 PDFをダウンロード",
                         "uri": report_download_url
                     },
@@ -475,6 +488,167 @@ def build_result_flex(
                     "height": "sm",
                     "margin": "sm"
                 }
+            ]
+        }
+    }
+
+
+def build_payment_prompt_flex(
+    archetype_name: str,
+    archetype_emoji: str,
+    soul_color_hex: str,
+    tagline: str,
+    rarity: str,
+    checkout_url: str,
+    voice_code_id: str = "",
+    note_name: str = "",
+    note_frequency_hz: float = 0.0,
+    price_yen: int = 3000,
+) -> dict:
+    """
+    決済誘導 Flex メッセージ。
+    診断テーザー（アーキタイプ名・色など）を見せつつ Stripe 決済へ誘導する。
+    """
+    price_label = f"¥{price_yen:,}"
+    note_text = f"{note_name} / {note_frequency_hz:.1f}Hz" if note_name else ""
+
+    detail_rows = []
+    if voice_code_id:
+        detail_rows.append({
+            "type": "box", "layout": "horizontal", "margin": "sm",
+            "contents": [
+                {"type": "text", "text": "声紋コード", "color": "#4A4A6A", "size": "xs", "flex": 1},
+                {"type": "text", "text": voice_code_id, "color": "#D4AF37",
+                 "size": "xs", "align": "end", "flex": 2, "weight": "bold"}
+            ]
+        })
+    if note_text:
+        detail_rows.append({
+            "type": "box", "layout": "horizontal", "margin": "sm",
+            "contents": [
+                {"type": "text", "text": "周波数", "color": "#4A4A6A", "size": "xs", "flex": 1},
+                {"type": "text", "text": note_text, "color": "#C8C0E0",
+                 "size": "xs", "align": "end", "flex": 2}
+            ]
+        })
+    if rarity:
+        detail_rows.append({
+            "type": "box", "layout": "horizontal", "margin": "sm",
+            "contents": [
+                {"type": "text", "text": "希少度", "color": "#4A4A6A", "size": "xs", "flex": 1},
+                {"type": "text", "text": rarity, "color": "#9090B0",
+                 "size": "xs", "align": "end", "flex": 2}
+            ]
+        })
+
+    return {
+        "type": "bubble",
+        "size": "mega",
+        "header": {
+            "type": "box", "layout": "vertical",
+            "backgroundColor": "#08080F", "paddingAll": "20px",
+            "contents": [
+                {"type": "text", "text": "V O I C E C O D E", "color": "#D4AF37",
+                 "size": "xxs", "align": "center", "letterSpacing": "4px"},
+                {"type": "text", "text": "✦ 声紋解析 完了 ✦", "color": "#E8E0FF",
+                 "size": "sm", "align": "center", "margin": "sm"}
+            ]
+        },
+        "body": {
+            "type": "box", "layout": "vertical",
+            "backgroundColor": "#0D0D1A", "paddingAll": "24px", "spacing": "md",
+            "contents": [
+                {"type": "text", "text": archetype_emoji, "size": "5xl", "align": "center"},
+                {"type": "text", "text": archetype_name, "color": soul_color_hex,
+                 "size": "xl", "align": "center", "weight": "bold", "wrap": True},
+                *([{
+                    "type": "text", "text": tagline,
+                    "color": "#9090B0", "size": "sm", "align": "center", "wrap": True, "margin": "sm"
+                }] if tagline else []),
+                {"type": "separator", "margin": "lg", "color": "#D4AF3740"},
+                *detail_rows,
+                {"type": "separator", "margin": "lg", "color": "#2A2A3A"},
+                {"type": "text",
+                 "text": "📋 プレミアムレポートに含まれる内容",
+                 "color": "#D4AF37", "size": "xs", "weight": "bold", "margin": "lg"},
+                {"type": "text",
+                 "text": "・12ページのプレミアムレポート\n・Big5パーソナリティ詳細診断\n・チャクラ診断・エネルギー分析\n・魂の使命・隠れた才能の読み解き\n・30日間の実践プラン",
+                 "color": "#7A7A9A", "size": "xs", "wrap": True, "margin": "sm"}
+            ]
+        },
+        "footer": {
+            "type": "box", "layout": "vertical",
+            "backgroundColor": "#0D0D1A", "paddingAll": "16px", "spacing": "sm",
+            "contents": [
+                {"type": "text",
+                 "text": f"プレミアムレポートを受け取るには\n{price_label}のお支払いが必要です",
+                 "color": "#9090B0", "size": "sm", "align": "center", "wrap": True},
+                {"type": "button",
+                 "action": {"type": "uri", "label": f"✨ {price_label}でプレミアムレポートを受け取る",
+                            "uri": checkout_url},
+                 "style": "primary", "color": "#D4AF37", "height": "sm", "margin": "md"},
+                {"type": "text",
+                 "text": "Stripeの安全な決済ページに移動します",
+                 "color": "#3A3A5A", "size": "xxs", "align": "center", "margin": "sm"}
+            ]
+        }
+    }
+
+
+def build_payment_complete_flex(
+    archetype_name: str,
+    report_view_url: str,
+    report_download_url: str,
+    share_url: str = "",
+) -> dict:
+    """
+    決済完了後に送る Flex メッセージ。
+    フルレポートのリンクを届ける。
+    """
+    return {
+        "type": "bubble",
+        "size": "mega",
+        "header": {
+            "type": "box", "layout": "vertical",
+            "backgroundColor": "#08080F", "paddingAll": "20px",
+            "contents": [
+                {"type": "text", "text": "V O I C E C O D E", "color": "#D4AF37",
+                 "size": "xxs", "align": "center", "letterSpacing": "4px"},
+                {"type": "text", "text": "✦ お支払い完了 ✦", "color": "#E8E0FF",
+                 "size": "sm", "align": "center", "margin": "sm"}
+            ]
+        },
+        "body": {
+            "type": "box", "layout": "vertical",
+            "backgroundColor": "#0D0D1A", "paddingAll": "24px", "spacing": "md",
+            "contents": [
+                {"type": "text", "text": "🎉", "size": "4xl", "align": "center"},
+                {"type": "text",
+                 "text": "ありがとうございます！\nレポートの準備ができました",
+                 "color": "#D4AF37", "size": "md", "align": "center",
+                 "weight": "bold", "wrap": True},
+                {"type": "separator", "margin": "lg", "color": "#D4AF3740"},
+                {"type": "text",
+                 "text": f"「{archetype_name}」の\n12ページプレミアムレポートをお届けします。",
+                 "color": "#9090B0", "size": "sm", "align": "center", "wrap": True, "margin": "md"}
+            ]
+        },
+        "footer": {
+            "type": "box", "layout": "vertical",
+            "backgroundColor": "#0D0D1A", "paddingAll": "16px", "spacing": "sm",
+            "contents": [
+                {"type": "button",
+                 "action": {"type": "uri", "label": "✨ プレミアムレポートを見る",
+                            "uri": report_view_url},
+                 "style": "primary", "color": "#D4AF37", "height": "sm"},
+                {"type": "button",
+                 "action": {"type": "uri", "label": "📣 SNSでシェアする",
+                            "uri": share_url if share_url else report_view_url},
+                 "style": "primary", "color": "#2D2D4A", "height": "sm", "margin": "sm"},
+                {"type": "button",
+                 "action": {"type": "uri", "label": "📄 PDFをダウンロード",
+                            "uri": report_download_url},
+                 "style": "secondary", "height": "sm", "margin": "sm"}
             ]
         }
     }

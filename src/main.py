@@ -53,6 +53,7 @@ diagnosis_router = None
 report_router = None
 line_router = None
 payment_router = None
+share_router = None
 
 try:
     from .api import audio as audio_router
@@ -83,6 +84,12 @@ try:
     logger.info("✅ payment router import OK")
 except Exception as e:
     logger.error(f"❌ payment router import FAILED: {e}", exc_info=True)
+
+try:
+    from .api import share as share_router
+    logger.info("✅ share router import OK")
+except Exception as e:
+    logger.error(f"❌ share router import FAILED: {e}", exc_info=True)
 
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
@@ -144,6 +151,7 @@ _safe_include(diagnosis_router, "diagnosis")
 _safe_include(report_router, "report")
 _safe_include(line_router, "line")
 _safe_include(payment_router, "payment")
+_safe_include(share_router, "share")
 
 
 @app.get("/")

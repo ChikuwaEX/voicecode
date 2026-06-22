@@ -12,6 +12,7 @@ import uuid
 import asyncio
 import httpx
 from pathlib import Path
+from typing import Optional
 
 from linebot.v3.webhooks.models import (
     FollowEvent,
@@ -110,6 +111,54 @@ async def handle_text_message(event: MessageEvent) -> None:
 # 内部処理：音声ダウンロード→解析→診断→レポート→プッシュ
 # ==============================================================
 
+def _create_stripe_checkout_url(
+    session_id: str,
+    archetype_name: str,
+    base_url: str,
+) -> Optional[str]:
+    """
+    Stripe Checkout Session を作成して URL を返す。
+    STRIPE_SECRET_KEY が未設定の場合は None を返す（フリーモードにフォールバック）。
+    """
+    import stripe as stripe_sdk
+
+    secret_key = os.getenv("STRIPE_SECRET_KEY", "")
+    if not secret_key:
+        return None
+
+    price_yen = int(os.getenv("DIAGNOSIS_PRICE_YEN", "3000"))
+    stripe_sdk.api_key = secret_key
+
+    try:
+        checkout = stripe_sdk.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "jpy",
+                    "product_data": {
+                        "name": "VOICECODE 声紋スピリチュアル診断レポート",
+                        "description": (
+                            f"12ページ プレミアムレポート / アーキタイプ: {archetype_name}\n"
+                            "チャクラ診断・魂の使命・隠れた才能・30日間プランを収録"
+                        ),
+                    },
+                    "unit_amount": price_yen,
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=f"{base_url}/api/v1/payment/line-success?session_id={session_id}",
+            cancel_url=f"{base_url}/api/v1/payment/line-cancel?session_id={session_id}",
+            metadata={"voicecode_session_id": session_id},
+            locale="ja",
+        )
+        logger.info(f"Stripe Checkout作成完了: {checkout.id}")
+        return checkout.url
+    except Exception as e:
+        logger.error(f"Stripe Checkout作成エラー: {e}")
+        return None
+
+
 async def _process_audio_and_push(user_id: str, message_id: str) -> None:
     """
     LINEの音声メッセージを処理してレポートを生成し、プッシュ送信する。
@@ -164,33 +213,68 @@ async def _process_audio_and_push(user_id: str, message_id: str) -> None:
         )
         logger.info(f"レポート生成完了: {report.file_path}")
 
-        # STEP 5: レポートURLを組み立てて結果をプッシュ
+        # STEP 5: セッションストアに登録（決済後のレポート配信に使用）
+        from ..session.store import get_store as _get_session_store
+        html_path = report.file_path.with_suffix(".html")
+        _get_session_store().create(
+            session_id=session_id,
+            line_user_id=user_id,
+            archetype_name=diagnosis.archetype_name,
+            report_html_path=str(html_path),
+            report_pdf_path=str(report.file_path),
+        )
+
+        # STEP 6: Stripe設定に応じて送信フローを切り替え
         base_url = _get_base_url()
         view_url = f"{base_url}/api/v1/report/{session_id}/view"
         download_url = f"{base_url}/api/v1/report/{session_id}/download"
+        share_url = f"{base_url}/api/v1/share/{session_id}"
 
-        flex = line_client.build_result_flex(
+        checkout_url = _create_stripe_checkout_url(
+            session_id=session_id,
             archetype_name=diagnosis.archetype_name,
-            archetype_emoji=diagnosis.archetype_emoji,
-            voice_code_id=diagnosis.voice_code_id,
-            report_view_url=view_url,
-            report_download_url=download_url,
-            rarity=diagnosis.archetype_rarity,
-            soul_color_name=getattr(diagnosis, 'soul_color_name', ''),
-            soul_color_hex=getattr(diagnosis, 'soul_color_hex', '#D4AF37'),
-            personal_color_hex=getattr(diagnosis, 'personal_color_hex', '#D4AF37'),
-            tagline=getattr(diagnosis, 'archetype_tagline', ''),
-            note_name=getattr(diagnosis, 'note_name', ''),
-            note_frequency_hz=getattr(diagnosis, 'note_frequency_hz', 0.0),
+            base_url=base_url,
         )
-        # 色名を含めた新しいメッセージ形式
-        color_name = getattr(diagnosis, 'soul_color_name', '')
-        alt = f"✦ 声紋リーディング完了｜あなたの声の色は「{color_name}」— {diagnosis.archetype_name}"
-        line_client.push_flex(
-            user_id=user_id,
-            alt_text=alt,
-            flex_container=flex
-        )
+
+        price_yen = int(os.getenv("DIAGNOSIS_PRICE_YEN", "3000"))
+
+        if checkout_url:
+            # --- マネタイズモード: テーザー + 決済ボタン ---
+            flex = line_client.build_payment_prompt_flex(
+                archetype_name=diagnosis.archetype_name,
+                archetype_emoji=diagnosis.archetype_emoji,
+                soul_color_hex=getattr(diagnosis, 'soul_color_hex', '#D4AF37'),
+                tagline=getattr(diagnosis, 'archetype_tagline', ''),
+                rarity=diagnosis.archetype_rarity,
+                checkout_url=checkout_url,
+                voice_code_id=diagnosis.voice_code_id,
+                note_name=getattr(diagnosis, 'note_name', ''),
+                note_frequency_hz=getattr(diagnosis, 'note_frequency_hz', 0.0),
+                price_yen=price_yen,
+            )
+            color_name = getattr(diagnosis, 'soul_color_name', '')
+            alt = f"✦ 声紋解析完了｜{diagnosis.archetype_name}｜¥{price_yen:,}でレポートを受け取る"
+        else:
+            # --- フリーモード（Stripe未設定）: フルレポートを即送信 ---
+            flex = line_client.build_result_flex(
+                archetype_name=diagnosis.archetype_name,
+                archetype_emoji=diagnosis.archetype_emoji,
+                voice_code_id=diagnosis.voice_code_id,
+                report_view_url=view_url,
+                report_download_url=download_url,
+                rarity=diagnosis.archetype_rarity,
+                soul_color_name=getattr(diagnosis, 'soul_color_name', ''),
+                soul_color_hex=getattr(diagnosis, 'soul_color_hex', '#D4AF37'),
+                personal_color_hex=getattr(diagnosis, 'personal_color_hex', '#D4AF37'),
+                tagline=getattr(diagnosis, 'archetype_tagline', ''),
+                note_name=getattr(diagnosis, 'note_name', ''),
+                note_frequency_hz=getattr(diagnosis, 'note_frequency_hz', 0.0),
+                share_url=share_url,
+            )
+            color_name = getattr(diagnosis, 'soul_color_name', '')
+            alt = f"✦ 声紋リーディング完了｜あなたの声の色は「{color_name}」— {diagnosis.archetype_name}"
+
+        line_client.push_flex(user_id=user_id, alt_text=alt, flex_container=flex)
 
     except Exception as e:
         logger.error(f"音声処理エラー: {e}", exc_info=True)

@@ -89,6 +89,16 @@ class ReportGenerator(IReportGenerator):
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html_content)
 
+        # シェア機能のためにRaw診断データをJSONで保存（同一ファイル名ステムを使用）
+        json_path = self._output_dir / f"{file_stem}.json"
+        try:
+            import json as _json
+            with open(json_path, "w", encoding="utf-8") as f:
+                _json.dump(diagnosis.to_dict(), f, ensure_ascii=False, indent=2, default=str)
+            logger.info(f"診断JSON保存完了: {json_path}")
+        except Exception as e:
+            logger.warning(f"診断JSON保存失敗（無視して続行）: {e}")
+
         # PlaywrightをThreadPoolExecutorで別スレッドで実行（asyncioループ対応）
         try:
             future = _playwright_executor.submit(_render_pdf_in_thread, html_content, str(pdf_path))

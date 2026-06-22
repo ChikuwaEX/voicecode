@@ -26,7 +26,7 @@ BASE_URL = os.getenv("BASE_URL", f"http://localhost:{os.getenv('APP_PORT', '8000
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(BASE_DIR / "uploads")))
 OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", str(BASE_DIR / "outputs")))
 WORLDVIEW_THEME_DIR = SRC_DIR / "diagnosis" / "worldview" / "themes"
-WORLDVIEW_THEME = os.getenv("WORLDVIEW_THEME", "elements_v1")
+WORLDVIEW_THEME = os.getenv("WORLDVIEW_THEME", "kotodama_v1")
 
 # ディレクトリを自動作成
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)

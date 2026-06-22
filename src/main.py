@@ -4,7 +4,9 @@ VOICECODE アプリケーション エントリーポイント
 FastAPIアプリを起動し、全APIルートとフロントエンドを登録します。
 """
 
+import asyncio
 import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -54,6 +56,8 @@ report_router = None
 line_router = None
 payment_router = None
 share_router = None
+record_router = None
+admin_router = None
 
 try:
     from .api import audio as audio_router
@@ -91,8 +95,51 @@ try:
 except Exception as e:
     logger.error(f"❌ share router import FAILED: {e}", exc_info=True)
 
+try:
+    from .api import record as record_router
+    logger.info("✅ record router import OK")
+except Exception as e:
+    logger.error(f"❌ record router import FAILED: {e}", exc_info=True)
+
+try:
+    from .api import admin as admin_router
+    logger.info("✅ admin router import OK")
+except Exception as e:
+    logger.error(f"❌ admin router import FAILED: {e}", exc_info=True)
+
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+
+
+def _cleanup_old_files(directory: Path, max_age_hours: int = 72) -> int:
+    """指定ディレクトリ内の古いファイルを削除してカウントを返す"""
+    cutoff = time.time() - max_age_hours * 3600
+    deleted = 0
+    for f in directory.glob("*"):
+        if f.is_file() and f.stat().st_mtime < cutoff:
+            try:
+                f.unlink()
+                deleted += 1
+            except Exception:
+                pass
+    return deleted
+
+
+async def _periodic_cleanup():
+    """1時間ごとに期限切れセッション・古いファイルを削除するバックグラウンドタスク"""
+    while True:
+        await asyncio.sleep(3600)
+        try:
+            from .session.store import get_store
+            expired_sessions = get_store().cleanup_expired()
+            old_outputs = _cleanup_old_files(config.OUTPUT_DIR, max_age_hours=72)
+            old_uploads = _cleanup_old_files(config.UPLOAD_DIR, max_age_hours=2)
+            logger.info(
+                f"定期クリーンアップ完了: "
+                f"sessions={expired_sessions}, outputs={old_outputs}, uploads={old_uploads}"
+            )
+        except Exception as e:
+            logger.error(f"定期クリーンアップエラー: {e}")
 
 
 @asynccontextmanager
@@ -105,8 +152,23 @@ async def lifespan(app: FastAPI):
     logger.info(f"世界観テーマ: {config.WORLDVIEW_THEME}")
     line_ok = bool(config.LINE_CHANNEL_ACCESS_TOKEN and config.LINE_CHANNEL_SECRET)
     logger.info(f"LINE Bot: {'✅ 設定済み' if line_ok else '⚠️  未設定'}")
+
+    # SQLite セッションストアを起動時に初期化
+    try:
+        from .session.store import get_store
+        get_store()
+        logger.info("✅ SQLite セッションストア初期化完了")
+    except Exception as e:
+        logger.error(f"❌ セッションストア初期化失敗: {e}")
+
     logger.info("=" * 50)
+
+    # 定期クリーンアップをバックグラウンドで起動
+    cleanup_task = asyncio.create_task(_periodic_cleanup())
+
     yield
+
+    cleanup_task.cancel()
     logger.info("VOICECODE シャットダウン完了")
 
 
@@ -152,6 +214,22 @@ _safe_include(report_router, "report")
 _safe_include(line_router, "line")
 _safe_include(payment_router, "payment")
 _safe_include(share_router, "share")
+_safe_include(record_router, "record")
+_safe_include(admin_router, "admin")
+
+
+@app.get("/record", include_in_schema=False)
+async def serve_record_page():
+    """ブラウザ録音ページへリダイレクト（/api/v1/record への短縮ルート）"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/api/v1/record")
+
+
+@app.get("/admin", include_in_schema=False)
+async def serve_admin_page():
+    """管理ダッシュボードへリダイレクト"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/api/v1/admin")
 
 
 @app.get("/")

@@ -830,6 +830,92 @@ def build_error_flex(message: str = "解析に失敗しました") -> dict:
     }
 
 
+def build_archetypes_list_flex() -> dict:
+    """10の声のタイプ（アーキタイプ）一覧Flexメッセージ"""
+    archetypes = [
+        ("🔥", "紅蓮",   "100人に8人",  "情熱と行動力の使者"),
+        ("🍂", "琥珀",   "100人に6人",  "直感と癒しの巫女"),
+        ("🌟", "黄金",   "100人に9人",  "創造と建設の設計者"),
+        ("💎", "翠玉",   "100人に12人", "調和と共鳴の調律師"),
+        ("💙", "瑠璃",   "100人に7人",  "知性と探求の求道者"),
+        ("🌊", "藍",     "100人に7人",  "洞察と知恵の賢者"),
+        ("🔮", "紫苑",   "100人に9人",  "夢想と変革の旅人"),
+        ("🌸", "薄紅",   "100人に11人", "共感と予言の神託者"),
+        ("⚡", "白銀",   "100人に6人",  "革新と開拓のパイオニア"),
+        ("🌑", "漆黒",   "100人に13人", "深淵と守護の番人"),
+    ]
+    rows = []
+    for emoji, name, rarity, tagline in archetypes:
+        rows.append({
+            "type": "box",
+            "layout": "horizontal",
+            "spacing": "sm",
+            "paddingTop": "8px",
+            "paddingBottom": "8px",
+            "contents": [
+                {"type": "text", "text": emoji, "size": "xl", "flex": 0, "align": "center"},
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "flex": 1,
+                    "paddingStart": "8px",
+                    "contents": [
+                        {"type": "text", "text": name, "color": "#D4AF37",
+                         "size": "sm", "weight": "bold"},
+                        {"type": "text", "text": tagline, "color": "#7A7A9A",
+                         "size": "xxs", "wrap": True},
+                    ]
+                },
+                {"type": "text", "text": rarity, "color": "#4A4A6A",
+                 "size": "xxs", "flex": 0, "align": "end"},
+            ]
+        })
+        rows.append({"type": "separator", "color": "#1A1A2E"})
+
+    return {
+        "type": "bubble",
+        "size": "mega",
+        "header": {
+            "type": "box",
+            "layout": "vertical",
+            "backgroundColor": "#08080F",
+            "paddingAll": "20px",
+            "contents": [
+                {"type": "text", "text": "V O I C E C O D E", "color": "#D4AF37",
+                 "size": "xxs", "align": "center", "letterSpacing": "4px"},
+                {"type": "text", "text": "10の声のアーキタイプ", "color": "#E8E0FF",
+                 "size": "lg", "align": "center", "weight": "bold", "margin": "sm"},
+                {"type": "text", "text": "あなたはどのタイプ？声紋で判定します",
+                 "color": "#7A7A9A", "size": "xxs", "align": "center"},
+            ]
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "backgroundColor": "#0D0D1A",
+            "paddingAll": "16px",
+            "spacing": "none",
+            "contents": rows
+        },
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "backgroundColor": "#0D0D1A",
+            "paddingAll": "16px",
+            "contents": [
+                {
+                    "type": "button",
+                    "action": {"type": "message", "label": "🎤 声を送って自分のタイプを知る",
+                               "text": "診断を始める"},
+                    "style": "primary",
+                    "color": "#D4AF37",
+                    "height": "sm"
+                }
+            ]
+        }
+    }
+
+
 def build_guide_flex() -> dict:
     """使い方ガイドFlexメッセージ"""
     return {

@@ -16,7 +16,18 @@ from ..diagnosis.models import DiagnosisResult
 logger = logging.getLogger(__name__)
 
 _FONT_DIR = Path(__file__).parent / "templates" / "fonts"
-_FONT_JP = _FONT_DIR / "NotoSansJP.ttf"
+
+# 日本語フォント候補（優先度順）
+_FONT_CANDIDATES = [
+    _FONT_DIR / "NotoSansJP.ttf",                                                  # ローカル開発用
+    Path("/usr/share/fonts/truetype/noto/NotoSansCJKjp-Regular.otf"),              # Debian apt fonts-noto-cjk
+    Path("/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf"),
+    Path("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"),
+    Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),                       # 最終フォールバック（ASCII）
+]
+
+_FONT_JP = next((p for p in _FONT_CANDIDATES if p.exists()), None)
 
 # ブランドカラー
 _GOLD = (212, 175, 55)
@@ -53,10 +64,13 @@ def _draw_gradient(img: Image.Image, top_color: Tuple, bottom_color: Tuple) -> N
 
 
 def _font(size: int) -> ImageFont.FreeTypeFont:
-    try:
-        return ImageFont.truetype(str(_FONT_JP), size)
-    except Exception:
-        return ImageFont.load_default()
+    if _FONT_JP is not None:
+        try:
+            return ImageFont.truetype(str(_FONT_JP), size)
+        except Exception:
+            pass
+    logger.warning("日本語フォントが見つかりません。デフォルトフォントを使用します。")
+    return ImageFont.load_default()
 
 
 def _wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> List[str]:

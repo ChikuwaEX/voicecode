@@ -34,6 +34,10 @@ _UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "./uploads"))
 
 # ガイドを返すキーワード
 _GUIDE_KEYWORDS = {"使い方", "ガイド", "help", "へるぷ", "方法", "診断を始める", "診断"}
+# シェアリンクを返すキーワード
+_SHARE_KEYWORDS = {"シェアする", "シェア", "share", "共有", "シェアリンク"}
+# 10タイプ一覧を返すキーワード
+_TYPES_KEYWORDS = {"10の声のタイプ", "10タイプ", "声のタイプ", "タイプ一覧", "アーキタイプ"}
 
 
 async def handle_follow(event: FollowEvent) -> None:
@@ -95,6 +99,20 @@ async def handle_text_message(event: MessageEvent) -> None:
         )
         return
 
+    # シェアキーワード → 直近のセッションのシェアURLを返す
+    if any(kw in text for kw in _SHARE_KEYWORDS):
+        await _handle_share_request(event)
+        return
+
+    # 10タイプキーワード → アーキタイプ一覧Flexを返す
+    if any(kw in text for kw in _TYPES_KEYWORDS):
+        line_client.reply_flex(
+            reply_token=event.reply_token,
+            alt_text="VOICECODEの10の声のタイプ",
+            flex_container=line_client.build_archetypes_list_flex()
+        )
+        return
+
     # その他のテキスト → シンプルな案内
     line_client.reply_text(
         reply_token=event.reply_token,
@@ -103,6 +121,56 @@ async def handle_text_message(event: MessageEvent) -> None:
             "このトークに「音声メッセージ」を送ってください。\n"
             "自動で声紋を解析し、12ページのプレミアムレポートをお届けします。\n\n"
             "「使い方」と送ると詳しいガイドを表示します。"
+        )
+    )
+
+
+# ==============================================================
+# 内部処理：シェアリクエスト
+# ==============================================================
+
+async def _handle_share_request(event: MessageEvent) -> None:
+    """
+    ユーザーの直近のセッションIDを取得してシェアURLを返す。
+    診断履歴がない場合は案内を送る。
+    """
+    user_id = event.source.user_id
+    base_url = _get_base_url()
+
+    try:
+        from ..session.store import get_store
+        store = get_store()
+        sessions = store.get_all()
+        # このユーザーの最新セッションを探す
+        user_sessions = [s for s in sessions if s.get("line_user_id") == user_id]
+    except Exception:
+        user_sessions = []
+
+    if not user_sessions:
+        line_client.reply_text(
+            reply_token=event.reply_token,
+            text=(
+                "📣 シェアするには、まず声紋診断を受けてください！\n\n"
+                "音声メッセージを送るか、下のボタンから録音できます。\n"
+                f"▶ {base_url}/record"
+            )
+        )
+        return
+
+    # 最新のセッションのシェアURL
+    latest = user_sessions[-1]
+    session_id = latest.get("session_id", "")
+    archetype_name = latest.get("archetype_name", "あなたのアーキタイプ")
+    share_url = f"{base_url}/share/{session_id}"
+
+    line_client.reply_text(
+        reply_token=event.reply_token,
+        text=(
+            f"📣 あなたのシェアページはこちらです！\n\n"
+            f"✦ {archetype_name}\n\n"
+            f"🔗 {share_url}\n\n"
+            "このURLをSNSでシェアすると、OGP画像付きで表示されます。\n"
+            "Instagramストーリー用の縦長画像もダウンロードできます！"
         )
     )
 

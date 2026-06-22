@@ -23,13 +23,21 @@ import httpx
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
+sys.stdout.reconfigure(encoding="utf-8")
+
 # プロジェクトルートを sys.path に追加
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "")
-BASE_URL = os.getenv("BASE_URL", "https://voicecode-production.up.railway.app")
+# 本番URLを優先。.envのBASE_URLが開発用の場合はRailway本番URLを使う
+_env_base = os.getenv("BASE_URL", "")
+BASE_URL = (
+    _env_base
+    if _env_base and "railway.app" in _env_base
+    else "https://voicecode-production.up.railway.app"
+)
 
 if not TOKEN:
     print("❌ LINE_CHANNEL_ACCESS_TOKEN が設定されていません")
@@ -73,37 +81,64 @@ def _make_richmenu_image(output_path: Path) -> None:
     # グリッド線
     for c in range(1, 3):
         x = c * cell_w
-        draw.line([(x, 0), (x, HEIGHT)], fill=CELL_BORDER, width=2)
-    draw.line([(0, cell_h), (WIDTH, cell_h)], fill=CELL_BORDER, width=2)
-    draw.rectangle([(0, 0), (WIDTH - 1, HEIGHT - 1)], outline=CELL_BORDER, width=2)
+        draw.line([(x, 0), (x, HEIGHT)], fill=CELL_BORDER, width=3)
+    draw.line([(0, cell_h), (WIDTH, cell_h)], fill=CELL_BORDER, width=3)
+    draw.rectangle([(0, 0), (WIDTH - 1, HEIGHT - 1)], outline=CELL_BORDER, width=3)
 
-    # 各セルに絵文字・ラベルを描画（フォントは環境依存のため簡易実装）
-    for label, emoji, col, row in MENU_ITEMS:
+    # フォントを探す（日本語対応フォントを優先）
+    font_candidates = [
+        "C:/Windows/Fonts/meiryo.ttc",
+        "C:/Windows/Fonts/YuGothM.ttc",
+        "C:/Windows/Fonts/msgothic.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "/app/fonts/NotoSansJP.ttf",
+    ]
+    font_large = None
+    font_small = None
+    for fp in font_candidates:
+        if Path(fp).exists():
+            try:
+                font_large = ImageFont.truetype(fp, 90)
+                font_small = ImageFont.truetype(fp, 55)
+                break
+            except Exception:
+                continue
+    if font_large is None:
+        font_large = ImageFont.load_default()
+        font_small = ImageFont.load_default()
+
+    # ラベルのみを描画（絵文字を使わずASCII対応）
+    label_ascii = [
+        ("VOICECODE", "Shindan"),
+        ("Tsukai-kata", "Guide"),
+        ("10 Types", "Sekai"),
+        ("Share", "Kekka"),
+        ("Ryokin", "Plan"),
+        ("FAQ", "Shitsumon"),
+    ]
+
+    for idx, (label, emoji, col, row) in enumerate(MENU_ITEMS):
         cx = col * cell_w + cell_w // 2
         cy = row * cell_h + cell_h // 2
 
-        # ゴールドの丸アイコン背景
-        r = 100
-        draw.ellipse([(cx - r, cy - r - 60), (cx + r, cy + r - 60)],
-                     fill=(30, 28, 10), outline=GOLD, width=3)
+        # ゴールドの丸
+        r = 120
+        draw.ellipse(
+            [(cx - r, cy - r - 40), (cx + r, cy + r - 40)],
+            fill=(20, 18, 5),
+            outline=GOLD,
+            width=4,
+        )
 
-        # テキスト（フォントなし環境では bbox が変わる）
+        # ラベルテキスト（日本語）
         try:
-            font_em = ImageFont.truetype("NotoSansJP-Bold.ttf", 80)
-            font_lb = ImageFont.truetype("NotoSansJP-Regular.ttf", 52)
+            bbox = draw.textbbox((0, 0), label, font=font_large)
+            tw = bbox[2] - bbox[0]
+            th = bbox[3] - bbox[1]
+            draw.text((cx - tw // 2, cy - th // 2 - 40), label,
+                      font=font_large, fill=TEXT_COLOR)
         except Exception:
-            font_em = ImageFont.load_default()
-            font_lb = ImageFont.load_default()
-
-        # 絵文字
-        bbox = draw.textbbox((0, 0), emoji, font=font_em)
-        ew = bbox[2] - bbox[0]
-        draw.text((cx - ew // 2, cy - 105), emoji, font=font_em, fill=TEXT_COLOR)
-
-        # ラベル
-        bbox2 = draw.textbbox((0, 0), label, font=font_lb)
-        lw = bbox2[2] - bbox2[0]
-        draw.text((cx - lw // 2, cy + 70), label, font=font_lb, fill=MUTED)
+            draw.text((cx - 60, cy - 50), label[:6], font=font_large, fill=TEXT_COLOR)
 
     img.save(output_path, "PNG")
     print(f"✅ リッチメニュー画像生成: {output_path}")
@@ -119,12 +154,12 @@ def create_richmenu() -> str:
     cell_h = HEIGHT // 2
 
     actions = [
-        {"type": "uri", "uri": f"{BASE_URL}/record"},           # 声紋診断
-        {"type": "message", "text": "使い方"},                   # ガイド
-        {"type": "message", "text": "10の声のタイプ"},            # タイプ一覧
-        {"type": "uri", "uri": f"{BASE_URL}/api/v1/share/demo"}, # シェア
-        {"type": "uri", "uri": f"{BASE_URL}/#pricing"},          # 料金
-        {"type": "message", "text": "よくある質問"},              # FAQ
+        {"type": "uri",     "uri": f"{BASE_URL}/record"},  # 声紋診断 → ブラウザ録音ページ
+        {"type": "message", "text": "使い方"},               # ガイド
+        {"type": "message", "text": "10の声のタイプ"},        # タイプ一覧
+        {"type": "message", "text": "シェアする"},            # シェア → ハンドラーで最新URLを返す
+        {"type": "uri",     "uri": f"{BASE_URL}/#pricing"}, # 料金
+        {"type": "message", "text": "よくある質問"},          # FAQ
     ]
 
     areas = []

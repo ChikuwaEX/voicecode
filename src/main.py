@@ -218,6 +218,13 @@ _safe_include(record_router, "record")
 _safe_include(admin_router, "admin")
 
 
+@app.get("/share/{session_id}", include_in_schema=False)
+async def serve_share_page(session_id: str):
+    """シェアページへのリダイレクト（短縮URL）"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url=f"/api/v1/share/{session_id}", status_code=301)
+
+
 @app.get("/record", include_in_schema=False)
 async def serve_record_page():
     """ブラウザ録音ページへリダイレクト（/api/v1/record への短縮ルート）"""

@@ -283,51 +283,50 @@ class DiagnosisEngine(IDiagnosisEngine):
 
     def _normalize_features(self, a: AudioAnalysisResult) -> dict:
         """
-        音響特徴量を0〜1の範囲に正規化する。
+        音響特徴量を日本人音声統計ベースで正規化する。
+
+        Zスコア方式: Z=0（平均）→0.5, Z=+2→1.0, Z=-2→0.0
+        「平均的な日本人の声からどれだけ外れているか」を判定。
+
+        参照統計:
+            - Takahashi et al. (2021): 日本人F0
+            - Teixeira et al. (2013): Jitter/Shimmer/HNR
+            - LINE録音品質（AAC 64kbps）劣化を考慮
         """
-        def norm_clamp(value, ref_low, ref_high):
-            """参照範囲で線形正規化してクランプ"""
-            if ref_high == ref_low:
+        def z_to_01(value, pop_mean, pop_std):
+            if pop_std <= 0:
                 return 0.5
-            normalized = (value - ref_low) / (ref_high - ref_low)
-            return max(0.0, min(1.0, normalized))
+            z = (value - pop_mean) / pop_std
+            return max(0.0, min(1.0, (z + 2.0) / 4.0))
 
-        # RMSエネルギー正規化（0.001〜0.2の範囲が典型的）
-        rms_norm = norm_clamp(a.rms_energy, 0.001, 0.15)
-
-        # 話速正規化（0〜10の範囲）
-        speech_rate_norm = norm_clamp(a.speech_rate, 0, 10)
-
-        # F0標準偏差正規化（0〜80Hzの範囲が典型的）
-        f0_std_norm = norm_clamp(a.f0_std_hz, 0, 80)
-
-        # ポーズ比率正規化（0〜1の範囲、すでに正規化済み）
-        pause_ratio_norm = max(0.0, min(1.0, a.pause_ratio))
+        # RMS: 平均0.045, σ=0.028
+        rms_norm = z_to_01(a.rms_energy, 0.045, 0.028)
+        # 話速: 平均5.2, σ=1.4
+        speech_rate_norm = z_to_01(a.speech_rate, 5.2, 1.4)
+        # F0変動: 平均22Hz, σ=12Hz
+        f0_std_norm = z_to_01(a.f0_std_hz, 22.0, 12.0)
+        # ポーズ比率: 平均0.23, σ=0.11
+        pause_ratio_norm = z_to_01(a.pause_ratio, 0.23, 0.11)
         pause_ratio_inv_norm = 1.0 - pause_ratio_norm
-
-        # ジッター正規化（0〜3%の範囲、正常値は0.5%以下）
-        jitter_norm = norm_clamp(a.jitter_local, 0, 3.0)
+        # ジッター: 平均0.65%, σ=0.30%
+        jitter_norm = z_to_01(a.jitter_local, 0.65, 0.30)
         jitter_inv_norm = 1.0 - jitter_norm
-
-        # シマー正規化（0〜10%の範囲、正常値は3%以下）
-        shimmer_norm = norm_clamp(a.shimmer_local, 0, 10.0)
+        # シマー: 平均3.2%, σ=1.5%
+        shimmer_norm = z_to_01(a.shimmer_local, 3.2, 1.5)
         shimmer_inv_norm = 1.0 - shimmer_norm
-
-        # HNR正規化（0〜30dBの範囲、15dB以上が正常）
-        hnr_norm = norm_clamp(a.hnr_db, 0, 30)
+        # HNR: 平均17dB, σ=4.5dB
+        hnr_norm = z_to_01(a.hnr_db, 17.0, 4.5)
         hnr_inv_norm = 1.0 - hnr_norm
-
-        # スペクトル重心正規化（500〜4000Hzの範囲）
-        spectral_centroid_norm = norm_clamp(a.spectral_centroid_mean, 500, 4000)
+        # スペクトル重心: 平均1900Hz, σ=500Hz
+        spectral_centroid_norm = z_to_01(a.spectral_centroid_mean, 1900.0, 500.0)
         spectral_centroid_inv_norm = 1.0 - spectral_centroid_norm
-        spectral_centroid_std_norm = norm_clamp(a.spectral_centroid_std, 0, 1500)
-
-        # MFCC変動性（MCCの標準偏差の平均）
+        # スペクトル重心変動: 平均500Hz, σ=230Hz
+        spectral_centroid_std_norm = z_to_01(a.spectral_centroid_std, 500.0, 230.0)
+        # MFCC変動性: 平均3.0, σ=1.5
         mfcc_variability = sum(abs(v) for v in a.mfcc_std) / max(len(a.mfcc_std), 1)
-        mfcc_variability_norm = norm_clamp(mfcc_variability, 0, 50)
-
-        # RMS変動性（音量の起伏）
-        rms_std_norm = norm_clamp(a.rms_std, 0, 0.05)
+        mfcc_variability_norm = z_to_01(mfcc_variability, 3.0, 1.5)
+        # RMS変動: 平均0.016, σ=0.009
+        rms_std_norm = z_to_01(a.rms_std, 0.016, 0.009)
         rms_std_inv_norm = 1.0 - rms_std_norm
 
         return {
